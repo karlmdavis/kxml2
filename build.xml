@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 
-<project name="kxml2" default="build" basedir="..">
+<project name="kxml2" default="build" basedir=".">
 
   
   <target name="javadoc">
@@ -46,6 +46,7 @@
     	<javac srcdir="src" verbose="true"
     	       destdir="tmpclasses"
     	       optimize="true"
+    		   target="1.1"
     	       debuglevel="none"/>
 	
         <mkdir dir="dist"/>
