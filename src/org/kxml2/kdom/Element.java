@@ -271,7 +271,7 @@ public class Element extends Node {
     /** Writes this element and all children to the given XmlWriter. */
 
     public void write(XmlSerializer writer)
-        throws IOException, XmlPullParserException {
+        throws IOException {
 
 		if (prefixes != null) {
 			for (int i = 0; i < prefixes.size (); i++) {
