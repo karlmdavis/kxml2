@@ -772,7 +772,16 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	entityMap.put ("quot", "\"");
     }
 
-    
+
+    public void setInput (InputStream is, String enc) 
+	throws IOException, XmlPullParserException {
+
+	// add heuristics here!
+
+	setInput (new InputStreamReader (is, enc));
+    }
+
+
     public boolean getFeature (String feature) {
 	if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals 
 	    (feature))
@@ -942,6 +951,16 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	return attributeCount;
     }
     
+    
+    public String getAttributeType () {
+	return null;
+    }
+
+
+    public boolean isDefaultAttribute () {
+	return false;
+    }
+
 
     public String getAttributeNamespace (int index) {
 	if (index >= attributeCount) throw new IndexOutOfBoundsException ();
@@ -1018,9 +1037,22 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	return type; 
     }
 	
-
-    //-----------------------------------------------------------------------------
+    //----------------------------------------------------------------------
     // utility methods to mak XML parsing easier ...
+
+
+    public int nextTag () throws XmlPullParserException, IOException {
+
+	next ();
+	if (type == TEXT && isWhitespace) next ();
+
+	if (type != END_TAG && type != START_TAG) 
+	    exception ("unexpected type");
+	    
+	return type;
+    }
+
+
 
     /**
      * test if the current event is of the given type and if the
@@ -1043,6 +1075,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
      *     throw new XmlPullParserException ( "....");
      * </pre>
      */
+
     public void require (int type, String namespace, String name)
         throws XmlPullParserException, IOException {
 
@@ -1055,11 +1088,12 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    exception ("expected: "+TYPES[type]+" {"+namespace+"}"+name);
     }
 
+
     /**
      * If the current event is text, the value of getText is
      * returned and next() is called. Otherwise, an empty
      * String ("") is returned. Useful for reading element
-     * content without needing to performing an additional
+     * content without needing to perform an additional
      * check if the element is empty.
      *
      * <p>essentially it does this
