@@ -227,6 +227,9 @@ public class Node { //implements XmlIO{
 
         do {
             int type = parser.getEventType();
+            
+   //         System.out.println(parser.getPositionDescription());
+            
             switch (type) {
 
                 case XmlPullParser.START_TAG :

@@ -257,6 +257,16 @@ public class KXmlParser implements XmlPullParser {
         while (true) {
             attributeCount = -1;
 
+			// degenerated needs to be handled before error because of possible
+			// processor expectations(!)
+
+			if (degenerated) {
+				degenerated = false;
+				type = END_TAG;
+				return;
+			}
+
+
             if (error != null) {
                 for (int i = 0; i < error.length(); i++)
                     push(error.charAt(i));
@@ -266,11 +276,6 @@ public class KXmlParser implements XmlPullParser {
                 return;
             }
 
-            if (degenerated) {
-                degenerated = false;
-                type = END_TAG;
-                return;
-            }
 
             if (relaxed
                 && (stackMismatch > 0 || (peek(0) == -1 && depth > 0))) {
@@ -431,8 +436,10 @@ public class KXmlParser implements XmlPullParser {
         else {
             while (true) {
                 c = read();
-                if (c == -1)
-                    exception(UNEXPECTED_EOF);
+                if (c == -1){
+                    error(UNEXPECTED_EOF);
+                    return COMMENT;
+                }
 
                 if (push)
                     push(c);
@@ -474,7 +481,7 @@ public class KXmlParser implements XmlPullParser {
 
                 case -1 :
                     error(UNEXPECTED_EOF);
-                    break;
+                    return;
 
                 case '\'' :
                     quoted = !quoted;
@@ -625,7 +632,7 @@ public class KXmlParser implements XmlPullParser {
 
             if (c == -1) {
                 error(UNEXPECTED_EOF);
-                type = COMMENT;
+                //type = COMMENT;
                 return;
             }
 
@@ -633,8 +640,8 @@ public class KXmlParser implements XmlPullParser {
 
             if (attrName.length() == 0) {
                 error("attr name expected");
-                type = COMMENT;
-                return;
+               //type = COMMENT;
+                break;
             }
 
             int i = (attributeCount++) << 2;

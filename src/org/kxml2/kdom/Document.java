@@ -62,8 +62,8 @@ public class Document extends Node {
 
     public void addChild(int index, int type, Object child) {
         if (type == ELEMENT) {
-            if (rootIndex != -1)
-                throw new RuntimeException("Only one document root element allowed");
+         //   if (rootIndex != -1)
+           //     throw new RuntimeException("Only one document root element allowed");
 
             rootIndex = index;
         }
