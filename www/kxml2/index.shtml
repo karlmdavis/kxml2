@@ -5,16 +5,30 @@
 
 <h1>kXML 2</h1>
 
-kXML 2 implements the XmlPull API. Please find general information about
-XmlPull parsers at <a href="http://xmlpull.org">xmlpull.org</a>.
+<p>kXML 2 implements the XmlPull API. Please find general information about
+XmlPull parsers including the interface documentation at 
+<a href="http://xmlpull.org">xmlpull.org</a>.</p>
+
+<p>kXML 2 is licensed under the BSD license.</p>
+
+<p>Naveen Balani has written a <a 
+href="http://www2.tw.ibm.com/developerWorks/tutorial/pdf/wi-kxml-a4.pdf">nice 
+introduction to kxml 2</a> for IBM Developer Works.</p>
+
 
 <h2>Parsing Element-Only and Text-Only Content</h2>
 
-<p>Please use the method <em>nextTag()</em> to parse element-only content 
-and <em>nextText()</em> to parse text-only content. <em>require()</em> may 
-optionally be used to assert a certain parser state.  The following sample 
-illustrates both situations and methods. The outer element <em>elements</em> has 
-element-only content; the contained <em>text</em>-elements have text-only content:</p>
+<p>General XML content can be parsed with the XML pull API using a loop advanving
+to the next event and a switch statement that depends on the event type. However, 
+when using XML for data transfer (in contrast to text documents), most XML elements 
+contain either only text or only other elements (possibly with further sub-elements). 
+For those common cases, the parsing process can be simplified significantly by
+using the XmlPull API methods <em>nextTag</em> and <em>nextText</em>. 
+
+Additionally, the method <em>require()</em> may optionally be used to assert a 
+certain parser state.  The following sample illustrates both situations and methods. 
+The outer element <em>elements</em> has element-only content; the contained 
+<em>text</em>-elements have text-only content:</p>
 
 <pre>
 &lt;elements&gt;
@@ -40,12 +54,13 @@ while(parser.nextTag() == XmlPullParser.START_TAG) {
 parser.require(XmlPullParser.END_TAG, null, "elements");
 </pre>
 
-<p>Please note that the calls <em>require()</em> are optional assertions, 
-they may be left out completely. <em>nextTag()</em> advances to the next 
+<p><em>nextTag()</em> advances to the next 
 start or end tag, skipping insignificant events such as white space, 
 comments and PIs. <em>nextText()</em> requires that the current position 
 is a start tag. It returns the text content of the corresponding element. 
-The post condition is that the current position is an end tag</p>
+The post condition is that the current position is an end tag.
+Please note that the calls <em>require()</em> are optional assertions, 
+they may be left out completely. </p>
 
 <!--#include virtual="../epilog.shtml" -->
 </body>

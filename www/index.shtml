@@ -6,33 +6,47 @@
 <h1>kXML News</h1>
 <table>
  <tr>
-  <td>2005-03-10</td>
-  <td>kXML 2 release 2.2.1: Bugfix for a getPositionDescription() problem if setReader was not called (1093859); thanks to Joe Chenbug.</td>
+  <td valign="top">2005-03-10</td>
+  <td valign="top">kXML 2 release 2.2.1: Bugfix for a getPositionDescription() problem if setReader was not called (1093859); thanks to Joe Chenbug.</td>
  </tr>
  <tr>
-  <td>2004-05-15</td>
-  <td>kXML 2 release 2.1.9: Relaxed mode improvements.</td>
+  <td valign="top">2004-05-15</td>
+  <td valign="top">kXML 2 release 2.1.9: Relaxed mode improvements.</td>
  </tr>
  <tr>
-  <td>2004-04-02</td>
-  <td>HowTo added: <a href="kxml2/eoto.shtml">Parsing Element-Only and Text-Only Content</a></td>
+  <td valign="top">2003-09-01</td>
+  <td valign="top">New <a  href="http://www2.tw.ibm.com/developerWorks/tutorial/pdf/wi-kxml-a4.pdf">article about 
+  kXML 2</a> written by Naveen Balani published at IBM Developer Works</td>
  </tr>
  <tr>
-  <td>2003-09-01</td>
-  <td>New article about kXML 2 at IBM Developer Works</td>
+  <td valign="top">2003-04-04</td>
+  <td valign="top">New <a href="http://www.devx.com/xml/Article/11773/0">article about kXML 1</a> written by Robert Cadenaat published at DevX</td>
  </tr>
  <tr>
-  <td>2003-04-04</td>
-  <td>New article about kXML 1 at DevX</td>
+  <td valign="top">2002-03-25</td>
+  <td valign="top">New <a href="http://developers.sun.com/techtopics/mobility/midp/ttips/compressxml/">article about kXML and WBXML comprssion</a> 
+  written by Eric Giguere available at the SUN developer connection</td>
  </tr>
  <tr>
-  <td>2002-03-25</td>
-  <td>New article about kXML and WBXML at the SUN developer connection</td>
- </tr>
+  <td valign="top">2002-03-07</td>
+  <td valign="top">New <a href="http://developers.sun.com/techtopics/mobility/midp/articles/parsingxml/">artikle about kXML 1</a>
+  written by Jonathan Knudsen available at the SUN developer connection</td>
+</tr>
+
+ 
  <tr>
-  <td>2002-02-20</td>
-  <td>kXML 1.21 available</td>
+  <td valign="top">2002-02-20</td>
+  <td valign="top">kXML 1.21 available</td>
  </tr>
+
+
+<tr>
+ <td valign="top">2001-07-25</td>
+ <td valign="top">New <a href="http://developers.sun.com/techtopics/mobility/configurations/ttips/xmlparse/">article about
+ kXML 1</a> written by Eric Giguere available at the SUN developer connection</td>
+</tr>
+
+
  <tr>
   <td>2001-07-25</td>
   <td>Release of kXML 1.0</td>

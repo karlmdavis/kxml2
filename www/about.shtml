@@ -31,7 +31,7 @@ XML pull API</a>.  </p>
    <td valign="top"><a href="kxml2">kXML2</a></td>
    <td valign="top">The current version of kXML. In contrast to kXML1, it features cursor
        API instead of event objects, leading to a reduced footprint and less object
-       creation overhead.</td>
+       creation overhead. kXML 2 is released under the BSD license.</td>
   </tr>
   <tr>
    <td valign="top"><a href="kxml3">kXML3</a></td>
@@ -64,6 +64,10 @@ XML pull API</a>.  </p>
 </ul>
 
 <p>Thus, kXML will accept some XML documents that should actually be rejected. Of course, an XML parser should detect all syntax errors to discourage the creation of bogous documents that work with one parser and do not work with another. Thus, if you are not limited by memory constraints, please use  <a href="http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/">MXP</a>, which is also faster than kXML.</p>
+
+<p align="right">
+<small>(C) 1999-2005 <a href="http://trantor.de/stefan.haustein">Stefan Haustein</a></small>
+</p>
 
 <!--#include virtual="epilog.shtml" -->
 
