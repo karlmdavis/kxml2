@@ -58,7 +58,7 @@ public class Roundtrip {
         throws XmlPullParserException, IOException {
         switch (parser.getEventType()) {
             case XmlPullParser.START_DOCUMENT :
-                //serializer.startDocument (null,
+                serializer.startDocument (null, null);
                 break;
 
             case XmlPullParser.END_DOCUMENT :
@@ -81,7 +81,10 @@ public class Roundtrip {
                 break;
 
             case XmlPullParser.TEXT :
-                serializer.text(parser.getText());
+            	if(parser.getText() == null)
+            		System.err.println("null text error at: "+parser.getPositionDescription());
+				else
+					serializer.text(parser.getText());
                 break;
 
             case XmlPullParser.ENTITY_REF :
@@ -114,8 +117,10 @@ public class Roundtrip {
 
     public void roundTrip()
         throws XmlPullParserException, IOException {
+        	
         while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
             writeToken();
+			serializer.flush();
             parser.nextToken();
         }
         writeToken();

@@ -460,7 +460,7 @@ public class KXmlSerializer implements XmlSerializer {
             || (namespace != null
                 && !namespace.equals(elementStack[depth * 3]))
             || !elementStack[depth * 3 + 2].equals(name))
-            throw new IllegalArgumentException("start/end tag mismatch");
+            throw new IllegalArgumentException("</{"+namespace+"}"+name+"> does not match start");
 
         if (pending) {
             check(true);

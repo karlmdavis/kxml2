@@ -433,6 +433,9 @@ public class WbxmlParser implements XmlPullParser {
                 buf.append((char) readByte());
 	        stringTable = buf.toString();
 	        
+	   //     System.out.println("String table: "+stringTable);
+	    //    System.out.println("String table length: "+stringTable.length());
+	        
 	        selectPage(0, true);
 			selectPage(0, false);
         }
@@ -621,6 +624,7 @@ public class WbxmlParser implements XmlPullParser {
 
         if (degenerated) {
             type = XmlPullParser.END_TAG;
+            degenerated = false;
             return;
         }
 
@@ -860,6 +864,7 @@ public class WbxmlParser implements XmlPullParser {
     void parseElement(int id)
         throws IOException, XmlPullParserException {
 
+		type = START_TAG;
         name = resolveId(tagTable, id & 0x03f);
 
         if ((id & 128) != 0) {
