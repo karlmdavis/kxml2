@@ -23,6 +23,7 @@
 package org.kxml2.wap;
 
 import java.io.*;
+import java.util.Vector;
 
 import org.xmlpull.v1.*;
 
@@ -37,6 +38,10 @@ public class WbxmlParser implements XmlPullParser {
         "Wrong event type";
 
     private InputStream in;
+
+	private int TAG_TABLE = 0;
+	private int ATTR_START_TABLE = 1;
+	private int ATTR_VALUE_TABLE = 2;
 
     private String[] attrStartTable;
     private String[] attrValueTable;
@@ -53,6 +58,7 @@ public class WbxmlParser implements XmlPullParser {
     private String[] attributes = new String[16];
 	private int nextId = -2;
 
+	private Vector tables = new Vector();
 
     int version;
     int publicIdentifierId;
@@ -70,6 +76,7 @@ public class WbxmlParser implements XmlPullParser {
     private int wapExtensionCode;
 
     private int type;
+	private int codePage;
 
     private boolean degenerated;
     private boolean isWhitespace;
@@ -425,6 +432,8 @@ public class WbxmlParser implements XmlPullParser {
             for (int i = 0; i < strTabSize; i++)
                 buf.append((char) readByte());
 	        stringTable = buf.toString();
+	        
+	        selectPage(0);
         }
         catch (IOException e) {
             exception("Illegal input format");
@@ -566,11 +575,36 @@ public class WbxmlParser implements XmlPullParser {
         return any;
     }
 
+	private final void setTable(int page, int type, String[] table) {
+		if(stringTable != null){
+			throw new RuntimeException("setXxxTable must be called before setInput!");
+		}
+		while(tables.size() < 3*page +3){
+			tables.addElement(null);
+		}
+		tables.setElementAt(table, page*3+type);
+	}
+		
+		
+
+
+
     private final void exception(String desc)
         throws XmlPullParserException {
         throw new XmlPullParserException(desc, this, null);
     }
 
+
+	private void selectPage(int nr) throws XmlPullParserException{
+		if(tables.size() == 0 && nr == 0) return;
+		
+		if(nr*3 > tables.size())
+			exception("Code Page "+nr+" undefined!");
+		
+		tagTable = (String[]) tables.elementAt(nr * 3 + TAG_TABLE);
+		attrStartTable = (String[]) tables.elementAt(nr * 3 + ATTR_START_TABLE);
+		attrValueTable = (String[]) tables.elementAt(nr * 3 + ATTR_VALUE_TABLE);
+	}
 
     private final void nextImpl()
         throws IOException, XmlPullParserException {
@@ -599,8 +633,7 @@ public class WbxmlParser implements XmlPullParser {
                 break;
 
             case Wbxml.SWITCH_PAGE :
-                if (readByte() != 0)
-                    throw new IOException("Curr. only CP0 supported");
+                selectPage(readByte());
                 break;
 
             case Wbxml.END :
@@ -665,8 +698,7 @@ public class WbxmlParser implements XmlPullParser {
         //        return next;
     }
 
-    /** For handling wap extensions in attributes, overwrite this
-    method, call super and return a corresponding TextEvent. */
+    
 
     public void parseWapExtension(int id)
         throws IOException, XmlPullParserException {
@@ -917,15 +949,17 @@ public class WbxmlParser implements XmlPullParser {
         return stringTable.substring(pos, end);
     }
 
-    /** Sets the tag table for a given page.
-     *	The first string in the array defines tag 5, the second tag 6 etc.
-     *  Currently, only page 0 is supported
+    /** 
+     * Sets the tag table for a given page.
+     * The first string in the array defines tag 5, the second tag 6 etc.
      */
 
     public void setTagTable(int page, String[] tagTable) {
-        this.tagTable = tagTable;
-        if (page != 0)
-            throw new RuntimeException("code pages curr. not supp.");
+    	setTable(page, TAG_TABLE, tagTable);
+    	
+//        this.tagTable = tagTable;
+  //      if (page != 0)
+    //        throw new RuntimeException("code pages curr. not supp.");
     }
 
     /** Sets the attribute start Table for a given page.
@@ -939,9 +973,12 @@ public class WbxmlParser implements XmlPullParser {
     public void setAttrStartTable(
         int page,
         String[] attrStartTable) {
-        this.attrStartTable = attrStartTable;
-        if (page != 0)
-            throw new RuntimeException("code pages curr. not supp.");
+
+		setTable(page, ATTR_START_TABLE, tagTable);
+
+//        this.attrStartTable = attrStartTable;
+ //       if (page != 0)
+   //         throw new RuntimeException("code pages curr. not supp.");
     }
 
     /** Sets the attribute value Table for a given page.
@@ -953,9 +990,12 @@ public class WbxmlParser implements XmlPullParser {
     public void setAttrValueTable(
         int page,
         String[] attrStartTable) {
-        this.attrValueTable = attrStartTable;
-        if (page != 0)
-            throw new RuntimeException("code pages curr. not supp.");
+
+		setTable(page, ATTR_VALUE_TABLE, tagTable);
+
+//        this.attrValueTable = attrStartTable;
+  //      if (page != 0)
+    //        throw new RuntimeException("code pages curr. not supp.");
     }
 
 }
