@@ -66,7 +66,7 @@ public class KXmlSerializer implements XmlSerializer {
                 writer.write(':');
                 writer.write(nspStack[i * 2]);
             }
-            else if (getNamespace().equals(""))
+            else if ("".equals(getNamespace()) && !"".equals(nspStack[i * 2 + 1]))
                 throw new IllegalStateException("Cannot set default namespace for elements in no namespace");
             writer.write("=\"");
             writeEscaped(nspStack[i * 2 + 1], '"');
