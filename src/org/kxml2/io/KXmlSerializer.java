@@ -342,7 +342,7 @@ public class KXmlSerializer implements XmlSerializer {
         if (indent[depth]) {
             writer.write("\r\n");
             for (int i = 0; i < depth; i++)
-                writer.write(' ');
+                writer.write("  ");
         }
 
         int esp = depth * 3;
@@ -470,7 +470,7 @@ public class KXmlSerializer implements XmlSerializer {
             if (indent[depth + 1]) {
                 writer.write("\r\n");
                 for (int i = 0; i < depth; i++)
-                    writer.write(' ');
+                    writer.write("  ");
             }
 
             writer.write("</");
