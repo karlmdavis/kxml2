@@ -743,7 +743,8 @@ public class KXmlParser implements XmlPullParser {
         if ((c < 'a' || c > 'z')
             && (c < 'A' || c > 'Z')
             && c != '_'
-            && c != ':')
+            && c != ':'
+            && c <= 160)
             exception("name expected");
 
         do {
@@ -756,7 +757,8 @@ public class KXmlParser implements XmlPullParser {
             || c == '_'
             || c == '-'
             || c == ':'
-            || c == '.');
+            || c == '.'
+            || c > 160);
 
         String result = get(pos);
         txtPos = pos;

@@ -265,7 +265,8 @@ public class KXmlSerializer implements XmlSerializer {
 
         int cnt = nspCounts[depth];
 
-        String prefix = "".equals (namespace) ? null 
+        String prefix = (namespace == null || "".equals (namespace)) 
+        	? null 
             : getPrefix(namespace, false, true);
 
         if (cnt != nspCounts[depth]) {
