@@ -475,7 +475,7 @@ public class KXmlParser implements XmlPullParser {
             if (!name.equals(elementStack[sp + 3]))
                 exception("expected: " + elementStack[sp + 3]);
         }
-        else if (depth == 0 || !name.equalsIgnoreCase(elementStack[sp + 3]))
+        else if (depth == 0 || !name.toLowerCase().equals(elementStack[sp + 3].toLowerCase()))
             return;
 
         namespace = elementStack[sp];
