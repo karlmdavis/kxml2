@@ -5,39 +5,34 @@ import org.xmlpull.v1.*;
 
 public class EventList {
 
-    public static void main (String [] args) throws IOException, XmlPullParserException{
-	
-	
-	for (int i = 0; i < 2; i++) {
+	public static void main(String[] args)
+		throws IOException, XmlPullParserException {
 
-	    XmlReader xr = new XmlReader ();
-	    xr.setInput (new FileReader (args [0]));
+		System.out.println ("This sample is not yet ported from kXML 1");
 
-	    System.out.println ("");
-	    System.out.println ("*** next" + (i==0 ? "Token":"")+" () event list ***");
-	    System.out.println ("");
-	
-	    do {
-		if (i == 0) xr.nextToken ();
-		else xr.next ();
+/*
+		for (int i = 0; i < 2; i++) {
 
-		System.out.println (xr.getPositionDescription ());
+			XmlReader xr = new XmlReader();
+			xr.setInput(new FileReader(args[0]));
 
-		/*		System.out.println ("depth:" + xr.getDepth () 
-				    + " nspcount (depth) "+xr.getNamespacesCount (xp.getDepth ()));
+			System.out.println("");
+			System.out.println(
+				"*** next" + (i == 0 ? "Token" : "") + " () event list ***");
+			System.out.println("");
 
-		for (int k = 0; k < xp.getNamespacesCount (xr.getDepth ()); k++)
-		    System.out.println ("prefix: "+x.getNamespacesPrefix (k)+" uri: "+xp.getNamespacesUri (k));
-		*/
+			do {
+				if (i == 0)
+					xr.nextToken();
+				else
+					xr.next();
 
-	    }
-	    while (xr.getType () != XmlPullParser.END_DOCUMENT);
+				System.out.println(xr.getPositionDescription());
+
+
+			} while (xr.getType() != XmlPullParser.END_DOCUMENT);
+		}
+*/
 	}
-    }
 
 }
-
-
-
-
-
