@@ -299,8 +299,8 @@ public class KXmlSerializer implements XmlSerializer {
         throws IOException {
         check();
 
-        if (namespace == null)
-            namespace = "";
+//        if (namespace == null)
+//            namespace = "";
 
         if (indent[depth]) {
             writer.write("\r\n");
@@ -316,7 +316,7 @@ public class KXmlSerializer implements XmlSerializer {
             elementStack = hlp;
         }
 
-        String prefix = getPrefix(namespace, true, true);
+        String prefix = namespace == null ? "" : getPrefix(namespace, true, true);
 
         depth++;
 
@@ -426,11 +426,12 @@ public class KXmlSerializer implements XmlSerializer {
         throws IOException {
 
         depth--;
-        if (namespace == null)
-            namespace = "";
+//        if (namespace == null)
+  //          namespace = "";
 
-        if (!elementStack[depth * 3].equals(namespace)
-            || !elementStack[depth * 3 + 2].equals(name))
+        if ((namespace == null && elementStack[depth * 3] != null)
+         || (namespace != null && !namespace.equals(elementStack[depth * 3]))
+         || !elementStack[depth * 3 + 2].equals(name))
             throw new IllegalArgumentException("start/end tag mismatch");
 
         if (pending) {
