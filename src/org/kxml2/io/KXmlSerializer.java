@@ -34,7 +34,9 @@ public class KXmlSerializer implements XmlSerializer {
     private int[] nspCounts = new int[4];
     private String[] nspStack = new String[8]; //prefix/nsp
     private boolean[] indent = new boolean[4];
-
+    private boolean unicode;
+    private String encoding;
+    
     private final void check() throws IOException {
         if (!pending)
             return;
@@ -71,7 +73,11 @@ public class KXmlSerializer implements XmlSerializer {
                         break;
                     }
                 default :
-                    writer.write(c);
+                    if (c < 127 || unicode) 
+                        writer.write(c);
+                    else
+                        writer.write("&#"+((int) c)+";");
+                        
             }
         }
     }
@@ -214,7 +220,8 @@ public class KXmlSerializer implements XmlSerializer {
         pending = false;
         auto = 0;
         depth = 0;
-        
+
+        unicode = false;        
     }
 
     public void setOutput(OutputStream os, String encoding)
@@ -224,16 +231,27 @@ public class KXmlSerializer implements XmlSerializer {
             encoding == null
                 ? new OutputStreamWriter(os)
                 : new OutputStreamWriter(os, encoding));
+        this.encoding = encoding;
+        if (encoding != null && encoding.toLowerCase().startsWith("utf")) 
+           unicode=true;
     }
 
     public void startDocument(String encoding, Boolean standalone)
         throws IOException {
         writer.write("<?xml version='1.0' ");
+
         if (encoding != null) {
+            this.encoding = encoding;
+            if (encoding.toLowerCase().startsWith("utf")) 
+                unicode=true;
+        }
+        
+        if(this.encoding != null) {
         	writer.write ("encoding='");
-        	writer.write (encoding);
+        	writer.write (this.encoding);
         	writer.write ("' ");
         }
+        
         if (standalone != null) {
         	writer.write ("standalone='");
         	writer.write (standalone.booleanValue() ? "yes" : "no");

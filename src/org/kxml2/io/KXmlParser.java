@@ -484,21 +484,6 @@ public class KXmlParser implements XmlPullParser {
     */
 
     private final void push(int c) {
-        if (c == '\r') {
-            wasCR = true;
-            c = type == START_TAG ? ' ' : '\n';
-        }
-        else if (c == '\n') {
-            if (wasCR) {
-                wasCR = false;
-                return;
-            }
-
-            if (type == START_TAG)
-                c = ' ';
-        }
-        else
-            wasCR = false;
 
         isWhitespace &= c <= ' ';
 
@@ -690,6 +675,10 @@ public class KXmlParser implements XmlPullParser {
 
                 pushEntity();
             }
+            else if (next == '\n' && type==START_TAG) {
+                read();
+                push(' ');
+            }
             else
                 push(read());
 
@@ -750,9 +739,22 @@ public class KXmlParser implements XmlPullParser {
                     nw = srcBuf[0];
 
                 srcPos = 1;
-            }
+             }
 
-            peek[peekCount++] = nw;
+            if (nw == '\r') {
+                wasCR = true;
+                peek[peekCount++] = '\n';
+            }
+            else {
+                if (nw == '\n') {
+                    if (!wasCR) 
+                        peek[peekCount++] = '\n';                     
+                }
+                else 
+                    peek[peekCount++] = nw;
+
+                wasCR = false;
+            }
         }
 
         return peek[pos];
