@@ -1,4 +1,4 @@
-/* kXML
+/* kXML 
  *
  * The contents of this file are subject to the "Lesser" GNU Public License
  * (LGPL) (the "License"); you may not use this file except in

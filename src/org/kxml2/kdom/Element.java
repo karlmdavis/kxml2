@@ -62,14 +62,11 @@ public class Element extends Node {
 
     /** 
      * Forwards creation request to parent if any, otherwise
-     * calls super.createElement. Please note: For no
-     * namespace, please use Xml.NO_NAMESPACE, null is not a legal
-     * value. Currently, null is converted to Xml.NO_NAMESPACE, but
-     * future versions may throw an exception. */
+     * calls super.createElement. */
 
     public Element createElement(
         String namespace,
-        String name) {
+        String name) { 
 
         return (this.parent == null)
             ? super.createElement(namespace, name)
@@ -112,20 +109,19 @@ public class Element extends Node {
 	}
 
     /** 
-     * Returns the document this element is a member of. The document
-     * is determined by ascending to the parent of the root element.
-     * If the element is not contained in a document, null is
-     * returned. */
+     * Returns the root node, determined by ascending to the 
+     * all parents un of the root element. */
 
-    public Document getDocument() {
+    public Node getRoot() {
 
-        if (parent instanceof Document)
-            return (Document) parent;
-
-        if (parent instanceof Element)
-            return ((Element) parent).getDocument();
-
-        return null;
+        Element current = this;
+        
+        while (current.parent != null) {
+            if (!(current.parent instanceof Element)) return current.parent;
+            current = (Element) current.parent;
+        }
+        
+        return current;
     }
 
     /** 
@@ -182,15 +178,15 @@ public class Element extends Node {
         return parent;
     }
 
-    /** 
-     * Returns the parent element if available, null otherwise */
+    /* 
+     * Returns the parent element if available, null otherwise 
 
     public Element getParentElement() {
         return (parent instanceof Element)
             ? ((Element) parent)
             : null;
     }
-
+*/
 
     /** 
      * Builds the child elements from the given Parser. By overwriting 
