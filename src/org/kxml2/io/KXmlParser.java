@@ -80,6 +80,10 @@ public class KXmlParser implements XmlPullParser {
     private int attributeCount;
     private String[] attributes = new String[16];
 
+    /** 
+     * A separate peek buffer seems simpler than managing
+     * wrap around in the first level read buffer */
+
     private int[] peek = new int[2];
     private int peekCount;
     private boolean wasCR;
