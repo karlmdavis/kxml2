@@ -518,9 +518,10 @@ public class KXmlParser implements XmlPullParser {
         if (!name.equals(elementStack[sp + 3])) {
             error("expected: /" + elementStack[sp + 3] + " read: " + name);
 
-            int probe = sp - 4;
-            stackMismatch = 1;
-            while (probe >= 0 && !name.equals(elementStack[probe + 3])) {
+			// become case insensitive in relaxed mode
+
+            int probe = sp;
+            while (probe >= 0 && !name.toLowerCase().equals(elementStack[probe + 3].toLowerCase())) {
                 stackMismatch++;
                 probe -= 4;
             }
@@ -652,18 +653,15 @@ public class KXmlParser implements XmlPullParser {
             else {
                 read('=');
                 skip();
-                int delimiter = read();
+                int delimiter = peek(0);
 
                 if (delimiter != '\'' && delimiter != '"') {
-                    error(
-                        "<"
-                            + name
-                            + ">: invalid attribute delimiter: "
-                            + (char) delimiter);
-
+                    error("attr value delimiter missing!");
                     delimiter = ' ';
                 }
-
+				else 
+					read();
+				
                 int p = txtPos;
                 pushText(delimiter, true);
 
