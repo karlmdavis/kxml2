@@ -1,133 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!-- please note: you need to add ant_ext.jar to your ant libary path to use this script -->
+
 <project name="kxml2" default="build" basedir="..">
 
-  <target name="init">
-
-    <!-- external library -->
-    <property name="kobjects.lib"   value="${basedir}/../kobjects/dist"/>
-
-    <!-- build setting -->
-    <property name="build.debug"    value="true"/>
-
-    <!-- project directory -->
-    <property name="src.dir"        value="${basedir}/src"/>
-    <property name="lib.dir"        value="${basedir}/lib"/>
-    <property name="build.dir"      value="${basedir}/build"/>
-    <property name="dist.dir"       value="${basedir}/dist"/>
-    <property name="classes.dir"    value="${basedir}/classes"/>
-    <property name="tmp.dir"        value="${basedir}/tmp"/>
-    <property name="doc.dir"        value="${basedir}/doc"/>
-    <property name="doc.api.dir"    value="${doc.dir}/api"/>
-    
-    <path id="build.classpath">
-      <fileset dir="${lib.dir}">
-        <include name="*.jar"/>
-      </fileset>
-      <fileset dir="${build.dir}">
-        <include name="*.jar"/>
-      </fileset>
-      <fileset dir="${kobjects.lib}">
-        <include name="*.jar"/>
-      </fileset>
-    </path>
-
-    <taskdef name="deploy" classname="SoapDeploy" classpathref="build.classpath"/>
-    <taskdef name="dialog" classname="PropertyDialog" classpathref="build.classpath"/>
-  </target>
-  
-  <target name="deployinfo" depends="init">
-    <dialog>
-      <query property="version" />
-      <query property="description" type="memo"/>
-      <query property="user" />
-      <query property="password" type="password"/>
-    </dialog>
+  <taskdef name="deploy" classname="SoapDeploy"/>
+  <taskdef name="dialog" classname="PropertyDialog" />
+ 
+   <target name="deployinfo">
+      <dialog>
+         <query property="version" />
+         <query property="description" type="memo"/>
+         <query property="user" />
+         <query property="password" type="password"/>
+      </dialog>
   </target>
 
   
   <target name="javadoc">
+    <delete dir="doc/api"/>
+    <mkdir dir="doc/api"/>    
     <javadoc packagenames="org.kxml2.*" classpath="lib/xmlpull_1_1_3_1.jar"
              public="yes"
              sourcepath="src"
-             destdir="${doc.api.dir}"
+             destdir="doc/api"
              author="true"
              version="true"
              use="true"
              windowtitle="kxml API"
-             doctitle="kxml API"/>
+             doctitle="kxml API"
+    />
   </target>
   
-  
-  <target name="build_src" depends="build_jar,javadoc">
-    <zip zipfile="${dist.dir}/kxml2-src.zip">
-      <fileset dir="${basedir}">
-	<include name="**" />
-	<exclude name="dist/kxml2-src.zip"/>
-      </fileset>
-    </zip>    
-  </target>
+    
+    <target name="build_src" depends="build_jar,javadoc">
+		<zip zipfile="dist/kxml2-src.zip">
+		  <fileset dir=".">
+		    <include name="*/**" />
+		    <exclude name="dist/kxml2-src.zip"/>
+		   </fileset>
+		</zip>    
+    
+    </target>
 
 
-  <target name="build_jar" depends="build">
+    <target name="build_jar">
 
-    <unzip src="${lib.dir}/xmlpull_1_1_3_1.jar" dest="${tmp.dir}/xmlpull"/>
-    <unzip src="${kobjects.lib}/kobjects-j2se.jar" dest="${tmp.dir}/kobjects"/>
-    <mkdir dir="${dist.dir}"/>
+    	<delete dir="tmpclasses"/>
+    	<mkdir dir="tmpclasses"/>
 
-    <jar jarfile="${dist.dir}/kxml2.jar">
-      <fileset dir="${classes.dir}">
-	<include name="**/*.class"/>
-	<include name="META-INF/**"/>
-      </fileset>
-      <fileset dir="${tmp.dir}/xmlpull"/>
-    </jar>
+    	<unzip src="lib/xmlpull_1_1_3_1.jar" dest="tmpclasses" overwrite="true"/>
+    
+    <!-- 	       debug="off" -->
+    	
+    	<javac srcdir="src" verbose="true"
+    	       destdir="tmpclasses"
+    	       optimize="true"
+    	       debuglevel="none"/>
+	
+        <mkdir dir="dist"/>
+            
+		<jar jarfile="dist/kxml2.jar">
+			<fileset dir="tmpclasses">
+				<include name="**/*.class"/>
+				<include name="META-INF/**"/>
+			</fileset>
+		</jar>
 
-    <jar jarfile="${dist.dir}/kxml2-min.jar">
-      <fileset dir="${classes.dir}">
-	<include name="org/kxml2/io/KXmlParser.class"/>
-	<include name="META-INF/**"/>
-      </fileset>
-      <fileset dir="${tmp.dir}/xmlpull">
-        <include name="org/xmlpull/v1/XmlPullParser.class"/>
-        <include name="org/xmlpull/v1/XmlPullParserException.class"/>
-      </fileset>
-    </jar>
+		<jar jarfile="dist/kxml2-min.jar">
+			<fileset dir="tmpclasses">
+		<!--		<include name="META-INF/**"/>  -->
+				<include name="org/xmlpull/v1/XmlPullParser.class"/>
+				<include name="org/xmlpull/v1/XmlPullParserException.class"/>
+				<include name="org/kxml2/io/KXmlParser.class"/>
+			</fileset>
+		</jar>
 
-    <jar jarfile="${dist.dir}/xmlrpc-min.jar">
-      <fileset dir="${classes.dir}">
-	<include name="org/kxml2/io/KXmlParser.class"/>
-        <include name="org/kxml2/xmlrpc/XmlRpcParser.class"/>
-      </fileset>
-      <fileset dir="${tmp.dir}/xmlpull">
-        <include name="org/xmlpull/v1/XmlPullParser.class"/>
-        <include name="org/xmlpull/v1/XmlPullParserException.class"/>
-      </fileset>
-    </jar>
+    	<delete dir="tmpclasses"/>
+	</target>
 
-  </target>
 
-  <target name="build" depends="init">
-    <mkdir dir="${classes.dir}"/>
-    <javac srcdir="${src.dir}"
-    	   destdir="${classes.dir}"
-    	   debug="${build.debug}"
-           classpathref="build.classpath"/>
-    <copy todir="${classes.dir}">
-      <fileset dir="${src.dir}" includes="META-INF/**"/>
-    </copy>
-  </target>
+    <target name="build" depends="build_src" />
 
-  <target name="deploy" depends="deployinfo,build_src"> 
-    <deploy target="http://kobjects.dyndns.org:8080/kobjects"
-	    project="kXML 2"
-	    login="${user}"
-	    password="${password}"
-	    version="${version}"
-	    description="${description}">
-      
-      <item file="${dist.dir}/kxml2.jar" />
-      <item file="${dist.dir}/kxml2-src.zip" />
-    </deploy>
-  </target>
-  
+    <target name="deploy" depends="deployinfo"> 
+		<deploy target="http://kobjects.dyndns.org/kobjects"
+				project="kXML 2"
+				login="${user}"
+				password="${password}"
+				version="${version}"
+				description="${description}">
+				
+			<item file="dist/kxml2.jar" />
+			<item file="dist/kxml2-min.jar" />
+			<item file="dist/kxml2-src.zip" />
+				
+		</deploy>
+		
+	</target>
+    
 </project>
