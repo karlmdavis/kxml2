@@ -795,23 +795,23 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     }
 
      
-    public int getNamespaceCount (int depth) throws XmlPullParserException {
+    public int getNamespaceCount (int depth) {
 	if (depth > this.depth) throw new IndexOutOfBoundsException ();
 	return nspCounts [depth];
     }
 
     
-    public String getNamespacePrefix (int pos) throws XmlPullParserException  {
+    public String getNamespacePrefix (int pos) {
 	return nspStack [pos << 1];
     }
 
     
-    public String getNamespaceUri(int pos) throws XmlPullParserException {
+    public String getNamespaceUri(int pos) {
 	return nspStack [(pos << 1) + 1];
     }
     
     
-    public String getNamespace (String prefix) throws XmlPullParserException {
+    public String getNamespace (String prefix) {
 
 	if ("xml".equals (prefix)) return "http://www.w3.org/XML/1998/namespace";
 	if ("xmlns".equals (prefix)) return "http://www.w3.org/2000/xmlns/";
