@@ -204,7 +204,7 @@ public class KXmlSerializer implements XmlSerializer {
         writer.write("");
     }
 
-    public void startTag(String namespace, String name) throws IOException {
+    public XmlSerializer startTag(String namespace, String name) throws IOException {
         check();
         if (indent[depth]) {
             writer.write("\r\n");
@@ -256,9 +256,11 @@ public class KXmlSerializer implements XmlSerializer {
         }
 
         pending = true;
+
+        return this;
     }
 
-    public void attribute(String namespace, String name, String value)
+    public XmlSerializer attribute(String namespace, String name, String value)
         throws IOException {
         if (!pending)
             throw new RuntimeException("illegal position for attribute");
@@ -292,6 +294,8 @@ public class KXmlSerializer implements XmlSerializer {
         writer.write(q);
         writeEscaped(value, '"');
         writer.write(q);
+
+        return this;
     }
 
     public void flush() throws IOException {
@@ -304,7 +308,7 @@ public class KXmlSerializer implements XmlSerializer {
     		writer.close();
     	}
     */
-    public void endTag(String namespace, String name) throws IOException {
+    public XmlSerializer endTag(String namespace, String name) throws IOException {
 
         depth--;
 
@@ -334,16 +338,19 @@ public class KXmlSerializer implements XmlSerializer {
         }
 
         nspCounts[depth + 1] = nspCounts[depth];
+        return this;
     }
 
-    public void text(String text) throws IOException {
+    public XmlSerializer text(String text) throws IOException {
         check();
         indent[depth] = false;
         writeEscaped(text, -1);
+        return this;
     }
 
-    public void text(char[] text, int start, int len) throws IOException {
+    public XmlSerializer text(char[] text, int start, int len) throws IOException {
         text(new String(text, start, len));
+        return this;
     }
 
     public void cdsect(String data) throws IOException {
