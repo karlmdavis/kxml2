@@ -57,7 +57,7 @@ public class Element extends Node {
 
     public void clear() {
         attributes = null;
-        children = new Vector ();
+        children = null;
     }
 
     /** 

@@ -1,20 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- please note: you need to add ant_ext.jar to your ant libary path to use this script -->
 
 <project name="kxml2" default="build" basedir="..">
-
-  <taskdef name="deploy" classname="SoapDeploy"/>
-  <taskdef name="dialog" classname="PropertyDialog" />
- 
-   <target name="deployinfo">
-      <dialog>
-         <query property="version" />
-         <query property="description" type="memo"/>
-         <query property="user" />
-         <query property="password" type="password"/>
-      </dialog>
-  </target>
 
   
   <target name="javadoc">
@@ -85,20 +72,15 @@
 
     <target name="build" depends="build_src" />
 
-    <target name="deploy" depends="deployinfo"> 
-		<deploy target="http://kobjects.dyndns.org/kobjects"
-				project="kXML 2"
-				login="${user}"
-				password="${password}"
-				version="${version}"
-				description="${description}">
-				
-			<item file="dist/kxml2.jar" />
-			<item file="dist/kxml2-min.jar" />
-			<item file="dist/kxml2-src.zip" />
-				
-		</deploy>
-		
-	</target>
+	<target name="deploy" depends="build" >
+      <ftp server="upload.sourceforge.net"
+         userid="anonymous"
+         remotedir="/incoming"
+         password="sh@kobjects.org">
+         <fileset dir="dist"/>
+      </ftp>
+    </target>
+ 
+	
     
 </project>
