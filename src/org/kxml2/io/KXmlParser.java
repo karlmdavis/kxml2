@@ -303,6 +303,7 @@ public class KXmlParser implements XmlPullParser {
         String req = "";
         int term;
         int result;
+        int prev = 0;
 
         read(); // <
         int c = read();
@@ -352,7 +353,14 @@ public class KXmlParser implements XmlPullParser {
                     && peek(0) == term
                     && peek(1) == '>')
                     break;
+
+                prev = c;
             }
+            
+            
+            if (term == '-' && prev == '-' && !relaxed)
+                throw new XmlPullParserException ("illegal comment delimiter: --->");
+
             read();
             read();
 
@@ -1197,11 +1205,11 @@ public class KXmlParser implements XmlPullParser {
                 minType = type;
             //	    if (curr <= TEXT) type = curr; 
         }
-        while (minType > CDSECT
+        while (minType > CDSECT   // ignorable
             || (minType >= TEXT && peekType() >= TEXT));
 
-        //        if (type > TEXT) type = TEXT;
         type = minType;
+        if (type > TEXT) type = TEXT;
 
         return type;
     }
