@@ -202,7 +202,7 @@ public class KXmlSerializer implements XmlSerializer {
 				writer.write(nspStack[i*2]);
 			}
 			writer.write ("=\'");
-			writer.write (nspStack[i*2+1]);
+			writeEscaped (nspStack[i*2+1], '"');
 			writer.write ('"');
 		}
 
@@ -214,7 +214,21 @@ public class KXmlSerializer implements XmlSerializer {
 		if (!pending)
 			throw new RuntimeException("illegal position for attribute");
 
+		int cnt = nspCounts [depth];
+
 		String prefix = getPrefix(namespace);
+		
+		if (cnt != nspCounts [depth]) {
+			writer.write (' ');
+			writer.write ("xmlns");
+			if (nspStack [cnt*2] != null) {
+				writer.write (':');
+				writer.write(nspStack[cnt*2]);
+			}
+			writer.write ("=\'");
+			writeEscaped (nspStack[cnt*2+1], '"');
+			writer.write ('"');
+		}
 
 		writer.write(' ');
 		if (prefix != null) {
@@ -260,6 +274,8 @@ public class KXmlSerializer implements XmlSerializer {
 			writer.write (name);
 			writer.write ('>');
 		}
+
+		nspCounts [depth+1] = nspCounts[depth];
 	}
 
 	public void text(String text) throws IOException {
