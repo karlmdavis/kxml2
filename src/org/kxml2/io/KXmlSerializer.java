@@ -362,7 +362,7 @@ public class KXmlSerializer implements XmlSerializer {
             for (int i = nspCounts[depth];
                 i < nspCounts[depth + 1];
                 i++) {
-                if ("".equals(nspStack[i * 2])) {
+                if ("".equals(nspStack[i * 2]) && !"".equals(nspStack[i * 2 + 1])) {
                     throw new IllegalStateException("Cannot set default namespace for elements in no namespace");
                 }
             }
