@@ -1,4 +1,23 @@
-// (c) 2001 Stefan Haustein
+/* kXML 2
+ *
+ * Copyright (C) 2000, 2001, 2002 
+ *               Stefan Haustein
+ *               D-46045 Oberhausen (Rhld.),
+ *               Germany. All Rights Reserved.
+ *
+ * The contents of this file are subject to the "Common Public
+ * License" (CPL); you may not use this file except in compliance
+ * with the License.
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
+ * the License for the specific terms governing rights and limitations
+ * under the License.
+ *
+ * Thanks to Paul Palaszewski, Wilhelm Fitzpatrick, 
+ * Eric Foster-Johnson, Michael Angel, and Liam Quinn for providing various
+ * fixes and hints for the KXML 1 parser.
+ * */
 // Contributors: Bjorn Aadland
 
 package org.kxml2.wap;
