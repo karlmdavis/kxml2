@@ -1060,7 +1060,7 @@ public class KXmlParser implements XmlPullParser {
                                     (char) ((srcBuf[3] << 8) | srcBuf[2]);
                                 srcCount = 1;
                             }
-                            else if ((chk & 0x0ffffff00) == 0x0EFBBBF) {
+                            else if ((chk & 0x0ffffff00) == 0x0EFBBBF00) {
                                 enc = "UTF-8";
                                 srcBuf[0] = srcBuf[3];
                                 srcCount = 1;
