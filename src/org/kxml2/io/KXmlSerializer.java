@@ -105,7 +105,8 @@ public class KXmlSerializer implements XmlSerializer {
     }
 
     public boolean getFeature(String name) {
-        return (FEATURE_INDENT_OUTPUT.equals(name)) ? indent[depth] : false;
+        return false;
+      //  return (FEATURE_INDENT_OUTPUT.equals(name)) ? indent[depth] : false;
     }
 
 
@@ -155,10 +156,10 @@ public class KXmlSerializer implements XmlSerializer {
     }
 
     public void setFeature(String name, boolean value) {
-        if (FEATURE_INDENT_OUTPUT.equals(name)) {
+   /*     if (FEATURE_INDENT_OUTPUT.equals(name)) {
             indent[depth] = value;
         }
-        else
+        else */
             throw new RuntimeException("Unsupported Feature");
     }
 
