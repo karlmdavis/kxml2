@@ -1,0 +1,17 @@
+<html>
+<head><title>kXML 1 Samples</title></head>
+<body bgcolor="#ffffff">
+<!--#include virtual="../prolog.shtml" -->
+
+<h1>kXML 1 Samples</h1>
+
+
+ <ul>
+   <li><a href="http://cvs.sourceforge.net/viewcvs.py/kxml/kxml2/samples/#dirlist">Some code fragments</a> illustrating how to use the API</li>
+   <li><a href="http://www.brothas.net/rssr/">RSS Reader</a> - a MIDP RSS reader using kXML 2.1.7</li>
+   <li><a href="http://web.vee.net/projects/azure/">Azure</a> - a free blog client for your phone and PDA</li>
+ </ul>
+ 
+<!--include virtual="../epilog.shtml" -->
+</body>
+</html>

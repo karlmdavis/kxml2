@@ -9,7 +9,8 @@
     <tr>
      <td bgcolor="#ccccff">
        <a href="/index.shtml">News</a><br />
-       <a href="/about.shtml">About</a>
+       <a href="/about.shtml">About</a><br />
+       <a href="/articles.shtml">Articles</a>
      </td>
     </tr>
     
@@ -17,7 +18,7 @@
      <td bgcolor="#ccccff">kXML 2</a>
       <small>
        <ul>
-        <li><a href="/kxml2/documentation.shtml">Documentation</a></li>
+        <li><a href="/kxml2/">Documentation</a></li>
         <li><a href="/kxml2/javadoc/">JavaDoc</a></li>
         <li><a href="http://sourceforge.net/project/showfiles.php?group_id=9157&package_id=58653">Download</a></li>
        </ul>

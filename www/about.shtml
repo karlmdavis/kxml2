@@ -14,27 +14,28 @@ XML pull API</a>.  </p>
 
  <table border="1" >
   <tr>
-   <td>XP</td>
-   <td valign="top">XP was the predecessor of kXML, a simple wrapper that turned a given SAX parser into a pull parser.
-       It was originally implemented to simplify message (de)serialization in the Infolayer project,
-       which is quite cumbersome with push parsers (SAX). The initial public release was 1999-12-25.</td>
+   <td valign="top">XP</td>
+   <td valign="top">XP was the predecessor of kXML, a simple wrapper that turned a given SAX parser 
+       into a pull parser.
+       XP was originally implemented to simplify message (de)serialization in the Infolayer project,
+       which is quite cumbersome with push parsers (SAX).</td>
   </tr>
   <tr>
    <td valign="top">kXML1</td>
-   <td>To be able to use the pull parser on embedded devices, it was necessary to get
-       rid of the SAX dependency. kXML1 is a simple pull parser based on event objects. 
+   <td valign="top">To use the pull parser on embedded devices, it was necessary to get
+       rid of the SAX dependency. kXML1 is a simple pull parser, based on event objects. 
        kXML1 is now deprecated, please use kXML2 instead. kXML1 is archieved at 
        <a href="http://kxml.objectweb.org">kxml.objectweb.org</a>.</td>
   </tr>
   <tr>
    <td valign="top"><a href="kxml2">kXML2</a></td>
-   <td>The current version of kXML. In contrast to kXML1, it features cursor
+   <td valign="top">The current version of kXML. In contrast to kXML1, it features cursor
        API instead of event objects, leading to a reduced footprint and less object
        creation overhead.</td>
   </tr>
   <tr>
-   <td><a href="kxml3">kXML3</a></td>
-   <td>kXML 3 will split the parser and API support available in versions for both, XmlPull and StAX</td>
+   <td valign="top"><a href="kxml3">kXML3</a></td>
+   <td valign="top">kXML 3 will split the parser and API support available in versions for both, XmlPull and StAX</td>
   </tr>
  </table> 
  

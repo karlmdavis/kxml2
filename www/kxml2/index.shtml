@@ -5,13 +5,13 @@
 
 <h1>kXML 2</h1>
 
-kXML 2 implements the XmlPull API. Please refer to <a href="xmlpull.org"> for the API documentation.</a>
+kXML 2 implements the XmlPull API. 
 
 
-<h2>Applications Using kXML 2</h2>
 
+<h2>Parsing Element-Only Content</h2>
 
-<h2>Articles about kXML 2</h2>
+<h2>Parsing Text-Only Content</h2>
 
 
 <!--#include virtual="../epilog.shtml" -->
