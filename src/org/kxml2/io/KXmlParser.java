@@ -702,14 +702,17 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
     
     public boolean getFeature (String feature) {
-	if ("http://xmlpull.org/v1/features/process-namespaces".equals 
+	if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals 
 	    (feature))
 	    return processNsp;
+	else if (XmlPullParser.FEATURE_REPORT_NAMESPACE_ATTRIBUTES.equals 
+		 (feature)) 
+		 return reportNspAttr;
 	else return false;
     }
  
 
-    public void defineCharacterEntity (String entity, String value) 
+    public void defineEntityReplacementText (String entity, String value) 
 	throws XmlPullParserException {
 	entityMap.put (entity, value);
     }
@@ -982,9 +985,10 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
    
     public void setFeature (String feature, boolean value) 
 	throws XmlPullParserException {
-	if ("http://xmlpull.org/v1/features/process-namespaces".equals 
-	    (feature))
+	if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals (feature))
 	    processNsp = value;
+	else if (XmlPullParser.FEATURE_REPORT_NAMESPACE_ATTRIBUTES.equals 
+		 (feature)) reportNspAttr = value;
 	else throw new XmlPullParserException 
 	    ("unsupported feature: "+feature);
     }
