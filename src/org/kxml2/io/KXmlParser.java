@@ -17,7 +17,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE. */
- 
+
 package org.kxml2.io;
 
 import java.io.*;
@@ -40,7 +40,6 @@ public class KXmlParser implements XmlPullParser {
     private String version;
     private Boolean standalone;
 
-    //   private boolean reportNspAttr;
     private boolean processNsp;
     private boolean relaxed;
     private Hashtable entityMap;
@@ -58,8 +57,6 @@ public class KXmlParser implements XmlPullParser {
     private int srcPos;
     private int srcCount;
 
-    //    private boolean eof;
-
     private int line;
     private int column;
 
@@ -71,7 +68,7 @@ public class KXmlParser implements XmlPullParser {
     // Event-related
 
     private int type;
-    private String text;
+    //private String text;
     private boolean isWhitespace;
     private String namespace;
     private String prefix;
@@ -80,6 +77,8 @@ public class KXmlParser implements XmlPullParser {
     private boolean degenerated;
     private int attributeCount;
     private String[] attributes = new String[16];
+    private int stackMismatch = 0;
+    private String error;
 
     /** 
      * A separate peek buffer seems simpler than managing
@@ -97,13 +96,13 @@ public class KXmlParser implements XmlPullParser {
             new char[Runtime.getRuntime().freeMemory() >= 1048576 ? 8192 : 128];
     }
 
-
-    private final boolean isProp (String n1, boolean prop, String n2) {
-        if (!n1.startsWith("http://xmlpull.org/v1/doc/")) return false;
-        if (prop) 
-            return n1.substring (42).equals(n2);            
-        else 
-            return n1.substring (40).equals(n2);
+    private final boolean isProp(String n1, boolean prop, String n2) {
+        if (!n1.startsWith("http://xmlpull.org/v1/doc/"))
+            return false;
+        if (prop)
+            return n1.substring(42).equals(n2);
+        else
+            return n1.substring(40).equals(n2);
     }
 
     private final boolean adjustNsp() throws XmlPullParserException {
@@ -139,7 +138,7 @@ public class KXmlParser implements XmlPullParser {
                 nspStack[j + 1] = attributes[i + 3];
 
                 if (attrName != null && attributes[i + 3].equals(""))
-                    exception("illegal empty namespace");
+                    error("illegal empty namespace");
 
                 //  prefixMap = new PrefixMap (prefixMap, attrName, attr.getValue ());
 
@@ -181,25 +180,28 @@ public class KXmlParser implements XmlPullParser {
                     attributes[i + 1] = attrPrefix;
                     attributes[i + 2] = attrName;
 
-                    if (!relaxed) {
-                        for (int j = (attributeCount << 2) - 4; j > i; j -= 4)
-                            if (attrName.equals(attributes[j + 2])
-                                && attrNs.equals(attributes[j]))
-                                exception(
-                                    "Duplicate Attribute: {"
-                                        + attrNs
-                                        + "}"
-                                        + attrName);
-                    }
+                    /*
+                                        if (!relaxed) {
+                                            for (int j = (attributeCount << 2) - 4; j > i; j -= 4)
+                                                if (attrName.equals(attributes[j + 2])
+                                                    && attrNs.equals(attributes[j]))
+                                                    exception(
+                                                        "Duplicate Attribute: {"
+                                                            + attrNs
+                                                            + "}"
+                                                            + attrName);
+                                        }
+                        */
                 }
             }
         }
 
         int cut = name.indexOf(':');
 
-        if (cut == 0 && !relaxed)
-            exception("illegal tag name: " + name);
-        else if (cut != -1) {
+        if (cut == 0)
+            error("illegal tag name: " + name);
+
+        if (cut != -1) {
             prefix = name.substring(0, cut);
             name = name.substring(cut + 1);
         }
@@ -207,8 +209,8 @@ public class KXmlParser implements XmlPullParser {
         this.namespace = getNamespace(prefix);
 
         if (this.namespace == null) {
-            if (prefix != null && !relaxed)
-                exception("undefined prefix: " + prefix);
+            if (prefix != null)
+                error("undefined prefix: " + prefix);
             this.namespace = NO_NAMESPACE;
         }
 
@@ -223,8 +225,20 @@ public class KXmlParser implements XmlPullParser {
         return bigger;
     }
 
+    private final void error(String desc) throws XmlPullParserException {
+        if (relaxed) {
+            if (error == null)
+                error = "ERR: " + desc;
+        }
+        else
+            exception(desc);
+    }
+
     private final void exception(String desc) throws XmlPullParserException {
-        throw new XmlPullParserException(desc.length() < 100 ? desc : desc.substring(0, 100) + "\n", this, null);
+        throw new XmlPullParserException(
+            desc.length() < 100 ? desc : desc.substring(0, 100) + "\n",
+            this,
+            null);
     }
 
     /** 
@@ -239,8 +253,17 @@ public class KXmlParser implements XmlPullParser {
         if (type == END_TAG)
             depth--;
 
-        while(true) {
+        while (true) {
             attributeCount = -1;
+
+            if (error != null) {
+                for (int i = 0; i < error.length(); i++)
+                    push(error.charAt(i));
+                //				text = error;
+                error = null;
+                type = COMMENT;
+                return;
+            }
 
             if (degenerated) {
                 degenerated = false;
@@ -248,10 +271,24 @@ public class KXmlParser implements XmlPullParser {
                 return;
             }
 
+            if (relaxed
+                && (stackMismatch > 0 || (peek(0) == -1 && depth > 0))) {
+                int sp = (depth - 1) << 2;
+                type = END_TAG;
+                namespace = elementStack[sp];
+                prefix = elementStack[sp + 1];
+                name = elementStack[sp + 2];
+                if (stackMismatch != 1)
+                    error = "missing end tag /" + name + " inserted";
+                if (stackMismatch > 0)
+                    stackMismatch--;
+                return;
+            }
+
             prefix = null;
             name = null;
             namespace = null;
-            text = null;
+            //            text = null;
 
             type = peekType();
 
@@ -316,35 +353,40 @@ public class KXmlParser implements XmlPullParser {
                 if ((peek(0) == 'l' || peek(0) == 'L') && peek(1) <= ' ') {
 
                     if (line != 1 || column > 4)
-                        exception("PI must not start with xml");
+                        error("PI must not start with xml");
 
                     parseStartTag(true);
 
                     if (attributeCount < 1 || !"version".equals(attributes[2]))
-                        exception("version expected");
+                        error("version expected");
 
                     version = attributes[3];
 
                     int pos = 1;
 
-                    if (pos < attributeCount && "encoding".equals (attributes[2+4]))  {
-                        encoding = attributes[3+4];
-                        pos++;                        
-                    }
-
-                    if (pos < attributeCount && "standalone".equals (attributes[4*pos+2])) {
-                        String st = attributes[3+4*pos];
-                        if ("yes".equals(st)) standalone = new Boolean(true);
-                        else if ("no".equals(st)) standalone = new Boolean(false);
-                        else exception ("illegal standalone value: "+st);
+                    if (pos < attributeCount
+                        && "encoding".equals(attributes[2 + 4])) {
+                        encoding = attributes[3 + 4];
                         pos++;
                     }
 
-                    if (pos != attributeCount) 
-                        exception("illegal xmldecl");
+                    if (pos < attributeCount
+                        && "standalone".equals(attributes[4 * pos + 2])) {
+                        String st = attributes[3 + 4 * pos];
+                        if ("yes".equals(st))
+                            standalone = new Boolean(true);
+                        else if ("no".equals(st))
+                            standalone = new Boolean(false);
+                        else
+                            error("illegal standalone value: " + st);
+                        pos++;
+                    }
+
+                    if (pos != attributeCount)
+                        error("illegal xmldecl");
 
                     isWhitespace = true;
-                    txtPos = 0;                    
+                    txtPos = 0;
 
                     return XML_DECL;
                 }
@@ -376,8 +418,8 @@ public class KXmlParser implements XmlPullParser {
             }
         }
         else {
-            exception("illegal: <" + c);
-            return -1;
+            error("illegal: <" + c);
+            return COMMENT;
         }
 
         for (int i = 0; i < req.length(); i++)
@@ -402,8 +444,8 @@ public class KXmlParser implements XmlPullParser {
                 prev = c;
             }
 
-            if (term == '-' && prev == '-' && !relaxed)
-                throw new XmlPullParserException("illegal comment delimiter: --->");
+            if (term == '-' && prev == '-')
+                error("illegal comment delimiter: --->");
 
             read();
             read();
@@ -423,14 +465,15 @@ public class KXmlParser implements XmlPullParser {
         int nesting = 1;
         boolean quoted = false;
 
-       // read();
+        // read();
 
         while (true) {
             int i = read();
             switch (i) {
 
                 case -1 :
-                    exception(UNEXPECTED_EOF);
+                    error(UNEXPECTED_EOF);
+                    break;
 
                 case '\'' :
                     quoted = !quoted;
@@ -466,16 +509,29 @@ public class KXmlParser implements XmlPullParser {
 
         int sp = (depth - 1) << 2;
 
-        if (!relaxed) {
-
-            if (depth == 0)
-                exception("element stack empty");
-
-            if (!name.equals(elementStack[sp + 3]))
-                exception("expected: " + elementStack[sp + 3]);
-        }
-        else if (depth == 0 || !name.toLowerCase().equals(elementStack[sp + 3].toLowerCase()))
+        if (depth == 0) {
+            error("element stack empty");
+            type = COMMENT;
             return;
+        }
+
+        if (!name.equals(elementStack[sp + 3])) {
+            error("expected: /" + elementStack[sp + 3] + " read: " + name);
+
+            int probe = sp - 4;
+            stackMismatch = 1;
+            while (probe >= 0 && !name.equals(elementStack[probe + 3])) {
+                stackMismatch++;
+                probe -= 4;
+            }
+
+            if (probe < 0) {
+                stackMismatch = 0;
+                //			text = "unexpected end tag ignored";
+                type = COMMENT;
+                return;
+            }
+        }
 
         namespace = elementStack[sp];
         prefix = elementStack[sp + 1];
@@ -565,28 +621,18 @@ public class KXmlParser implements XmlPullParser {
                 }
             }
 
-            if (c == -1)
-                exception(UNEXPECTED_EOF);
+            if (c == -1) {
+                error(UNEXPECTED_EOF);
+                type = COMMENT;
+                return;
+            }
 
             String attrName = readName();
 
-            if (attrName.length() == 0)
-                exception("attr name expected");
-
-            skip();
-            read('=');
-            skip();
-            int delimiter = read();
-
-            if (delimiter != '\'' && delimiter != '"') {
-                if (!relaxed)
-                    exception(
-                        "<"
-                            + name
-                            + ">: invalid delimiter: "
-                            + (char) delimiter);
-
-                delimiter = ' ';
+            if (attrName.length() == 0) {
+                error("attr name expected");
+                type = COMMENT;
+                return;
             }
 
             int i = (attributeCount++) << 2;
@@ -597,14 +643,36 @@ public class KXmlParser implements XmlPullParser {
             attributes[i++] = null;
             attributes[i++] = attrName;
 
-            int p = txtPos;
-            pushText(delimiter, true);
+            skip();
 
-            attributes[i] = get(p);
-            txtPos = p;
+            if (peek(0) != '=') {
+				error("Attr.value missing f. "+attrName);
+                attributes[i] = "1";
+            }
+            else {
+                read('=');
+                skip();
+                int delimiter = read();
 
-            if (delimiter != ' ')
-                read(); // skip endquote
+                if (delimiter != '\'' && delimiter != '"') {
+                    error(
+                        "<"
+                            + name
+                            + ">: invalid attribute delimiter: "
+                            + (char) delimiter);
+
+                    delimiter = ' ';
+                }
+
+                int p = txtPos;
+                pushText(delimiter, true);
+
+                attributes[i] = get(p);
+                txtPos = p;
+
+                if (delimiter != ' ')
+                    read(); // skip endquote
+            }
         }
 
         int sp = depth++ << 2;
@@ -620,15 +688,16 @@ public class KXmlParser implements XmlPullParser {
 
         nspCounts[depth] = nspCounts[depth - 1];
 
-		if(!relaxed){
-        for (int i = attributeCount - 1; i > 0; i--) {
-            for (int j = 0; j < i; j++) {
-                if (getAttributeName(i).equals(getAttributeName(j)))
-                    exception("Duplicate Attribute: " + getAttributeName(i));
-            }
-        }
-		}
-
+        /*
+        		if(!relaxed){
+                for (int i = attributeCount - 1; i > 0; i--) {
+                    for (int j = 0; j < i; j++) {
+                        if (getAttributeName(i).equals(getAttributeName(j)))
+                            exception("Duplicate Attribute: " + getAttributeName(i));
+                    }
+                }
+        		}
+        */
         if (processNsp)
             adjustNsp();
         else
@@ -653,17 +722,19 @@ public class KXmlParser implements XmlPullParser {
             int c = read();
             if (c == ';')
                 break;
-            if (c < 128 
+            if (c < 128
                 && (c < '0' || c > '9')
                 && (c < 'a' || c > 'z')
                 && (c < 'A' || c > 'Z')
-                && c != '_' && c != '-' && c != '#') {
-                    if(!relaxed){
-                        exception("unterminated entity ref"); //; ends with:"+(char)c);            
-                    }
-                    if (c != -1) push(c);                
-                    return;
-                }
+                && c != '_'
+                && c != '-'
+                && c != '#') {
+                error("unterminated entity ref");
+                //; ends with:"+(char)c);           
+                if (c != -1)
+                    push(c);
+                return;
+            }
 
             push(c);
         }
@@ -687,8 +758,8 @@ public class KXmlParser implements XmlPullParser {
         unresolved = result == null;
 
         if (unresolved) {
-            if (!token && !relaxed)
-                exception("unresolved: &" + code + ";");
+            if (!token)
+                error("unresolved: &" + code + ";");
         }
         else {
             for (int i = 0; i < result.length(); i++)
@@ -706,7 +777,7 @@ public class KXmlParser implements XmlPullParser {
         throws IOException, XmlPullParserException {
 
         int next = peek(0);
-		int cbrCount =0;
+        int cbrCount = 0;
 
         while (next != -1 && next != delimiter) { // covers eof, '<', '"'
 
@@ -720,20 +791,20 @@ public class KXmlParser implements XmlPullParser {
 
                 pushEntity();
             }
-            else if (next == '\n' && type==START_TAG) {
+            else if (next == '\n' && type == START_TAG) {
                 read();
                 push(' ');
             }
             else
                 push(read());
 
-			if(next == '>' && cbrCount >= 2 && delimiter != ']')
-				exception("Illegal: ]]>");
+            if (next == '>' && cbrCount >= 2 && delimiter != ']')
+                error("Illegal: ]]>");
 
-			if(next == ']')
-				cbrCount++;
-			else
-				cbrCount = 0;
+            if (next == ']')
+                cbrCount++;
+            else
+                cbrCount = 0;
 
             next = peek(0);
         }
@@ -742,8 +813,8 @@ public class KXmlParser implements XmlPullParser {
     private final void read(char c)
         throws IOException, XmlPullParserException {
         int a = read();
-        if (a != c && !relaxed)
-            exception("expected: '" + c + "' actual: '" + ((char) a) + "'");
+        if (a != c)
+            error("expected: '" + c + "' actual: '" + ((char) a) + "'");
     }
 
     private final int read() throws IOException {
@@ -792,7 +863,7 @@ public class KXmlParser implements XmlPullParser {
                     nw = srcBuf[0];
 
                 srcPos = 1;
-             }
+            }
 
             if (nw == '\r') {
                 wasCR = true;
@@ -800,10 +871,10 @@ public class KXmlParser implements XmlPullParser {
             }
             else {
                 if (nw == '\n') {
-                    if (!wasCR) 
-                        peek[peekCount++] = '\n';                     
+                    if (!wasCR)
+                        peek[peekCount++] = '\n';
                 }
-                else 
+                else
                     peek[peekCount++] = nw;
 
                 wasCR = false;
@@ -822,8 +893,9 @@ public class KXmlParser implements XmlPullParser {
             && (c < 'A' || c > 'Z')
             && c != '_'
             && c != ':'
-            && c < 0x0c0  && !relaxed)
-            exception("name expected");
+            && c < 0x0c0
+            && !relaxed)
+            error("name expected");
 
         do {
             push(read());
@@ -867,7 +939,7 @@ public class KXmlParser implements XmlPullParser {
         attributeCount = -1;
         encoding = null;
         version = null;
-        standalone= null;
+        standalone = null;
 
         if (reader == null)
             return;
@@ -1030,7 +1102,7 @@ public class KXmlParser implements XmlPullParser {
     public Object getProperty(String property) {
         if (isProp(property, true, "xmldecl-version"))
             return version;
-        if (isProp(property, true, "xmldecl-standalone"))            
+        if (isProp(property, true, "xmldecl-standalone"))
             return standalone;
         return null;
     }
@@ -1313,27 +1385,26 @@ public class KXmlParser implements XmlPullParser {
         throws XmlPullParserException {
         throw new XmlPullParserException("unsupported property: " + property);
     }
-    
-	/**
-	  * Skip sub tree that is currently porser positioned on.
-	  * <br>NOTE: parser must be on START_TAG and when funtion returns
-	  * parser will be positioned on corresponding END_TAG. 
-	  */
-	
+
+    /**
+      * Skip sub tree that is currently porser positioned on.
+      * <br>NOTE: parser must be on START_TAG and when funtion returns
+      * parser will be positioned on corresponding END_TAG. 
+      */
+
     //	Implementation copied from Alek's mail... 
-    
-	 public void skipSubTree()
-		 throws XmlPullParserException, IOException
-	 {
-		 require(START_TAG, null, null);
-		 int level = 1;
-		 while(level > 0) {
-			 int eventType = next();
-			 if(eventType == END_TAG) {
-				 --level;
-			 } else if(eventType == START_TAG) {
-				 ++level;
-			 }
-		 }
-	 } 
+
+    public void skipSubTree() throws XmlPullParserException, IOException {
+        require(START_TAG, null, null);
+        int level = 1;
+        while (level > 0) {
+            int eventType = next();
+            if (eventType == END_TAG) {
+                --level;
+            }
+            else if (eventType == START_TAG) {
+                ++level;
+            }
+        }
+    }
 }
