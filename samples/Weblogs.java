@@ -7,7 +7,7 @@ import java.net.*;
 /** 
  * A simple example illustrationg some differences of the XmlPull API 
  * and SAX. For the corresponding SAX based implementation, please refer to 
- * http://www.cafeconleche.org/slides/sd2001east/xmlandjava/81.html */
+ * http://www.cafeconleche.org/slides/sd2001east/xmlandjava/81.html ff. */
 
 public class Weblogs {
 
