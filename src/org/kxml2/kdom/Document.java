@@ -21,7 +21,6 @@
 
 package org.kxml2.kdom;
 
-import java.util.*;
 import java.io.*;
 
 import org.xmlpull.v1.*;
@@ -82,7 +81,7 @@ public class Document extends Node {
     public void parse(XmlPullParser parser)
         throws IOException, XmlPullParserException {
 
-		parser.require(parser.START_DOCUMENT, null, null);
+		parser.require(XmlPullParser.START_DOCUMENT, null, null);
 		parser.nextToken ();        	
 
         encoding = parser.getInputEncoding();
@@ -90,7 +89,7 @@ public class Document extends Node {
         
         super.parse(parser);
 
-        if (parser.getEventType() != parser.END_DOCUMENT)
+        if (parser.getEventType() != XmlPullParser.END_DOCUMENT)
             throw new RuntimeException("Document end expected!");
 
     }

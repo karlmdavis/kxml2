@@ -23,7 +23,6 @@
 package org.kxml2.wap;
 
 import java.io.*;
-import java.util.*;
 
 import org.xmlpull.v1.*;
 

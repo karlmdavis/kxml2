@@ -225,7 +225,7 @@ public class Element extends Node {
 		}
 		
         parser.require(
-            parser.END_TAG,
+            XmlPullParser.END_TAG,
             getNamespace(),
             getName());
             
