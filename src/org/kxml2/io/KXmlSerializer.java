@@ -91,6 +91,14 @@ public class KXmlSerializer implements XmlSerializer {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             switch (c) {
+            	case '\n':
+            	case '\r':
+            	case '\t':
+            		if(quot == -1) 
+            			writer.write(c);
+            		else 
+            			writer.write("&#"+((int) c)+';');
+            		break;
                 case '&' :
                     writer.write("&amp;");
                     break;
@@ -108,7 +116,10 @@ public class KXmlSerializer implements XmlSerializer {
                         break;
                     }
                 default :
-                    if (/*c >= ' ' && */(c < 127 || unicode))
+                	if(c < ' ')
+						throw new IllegalArgumentException("Illegal control code:"+((int) c));
+
+                    if ((c < 127 || unicode))
                         writer.write(c);
                     else
                         writer.write("&#" + ((int) c) + ";");
