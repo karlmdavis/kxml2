@@ -633,15 +633,15 @@ public class WbxmlParser implements XmlPullParser {
         name = null;
 
         int id = peekId ();
+        while(id == Wbxml.SWITCH_PAGE){
+			selectPage(readByte(), true);
+			id = peekId();        	
+        }
         nextId = -2;
 
         switch (id) {
             case -1 :
                 type = XmlPullParser.END_DOCUMENT;
-                break;
-
-            case Wbxml.SWITCH_PAGE :
-                selectPage(readByte(), true);
                 break;
 
             case Wbxml.END :
