@@ -652,6 +652,10 @@ public class KXmlParser implements XmlPullParser {
             int c = read();
             if (c == ';')
                 break;
+            if (relaxed && (c == '<' || c == '&' || c <= ' ')) {
+                if (c != -1) push(c);                
+                return;
+            }
             if (c == -1)
                 exception(UNEXPECTED_EOF);
             push(c);
