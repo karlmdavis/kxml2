@@ -14,7 +14,7 @@
  * Germany. All Rights Reserved.
  *
  * Contributor(s): Paul Palaszewski, Wilhelm Fitzpatrick, 
- *                 Eric Foster-Johnson
+ *                 Eric Foster-Johnson,  Andreas Weiss
  *
  * */
 
