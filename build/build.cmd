@@ -7,7 +7,7 @@ javac -g:none -O -d %XMLPULL%\classes org\xmlpull\v1\*.java
 
 cd %KXML2%\src
 
-javac -classpath %XMLPULL%\classes -g:none -O -d %KXML2%/classes org/kxml2/io/*.java
+javac -classpath %XMLPULL%\classes -g:none -O -d %KXML2%/classes org/kxml2/io/*.java org/kxml2/kdom/*.java
 
 cd %KXML2%\classes
 
