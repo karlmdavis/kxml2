@@ -84,8 +84,10 @@ public class KXmlSerializer implements XmlSerializer {
     	}*/
 
 
-    public void docdecl(String dd) {
-        throw new RuntimeException("NYI");
+    public void docdecl(String dd) throws IOException{
+        writer.write("<!DOCTYPE ");
+        writer.write(dd);
+        writer.write(">");
     }
 
     public void endDocument() throws IOException {
@@ -226,7 +228,18 @@ public class KXmlSerializer implements XmlSerializer {
 
     public void startDocument(String encoding, Boolean standalone)
         throws IOException {
-        writer.write("");
+        writer.write("<?xml version='1.0' ");
+        if (encoding != null) {
+        	writer.write ("encoding='");
+        	writer.write (encoding);
+        	writer.write ("' ");
+        }
+        if (standalone != null) {
+        	writer.write ("encoding='");
+        	writer.write (standalone.booleanValue() ? "yes" : "no");
+        	writer.write ("' ");
+        }
+        writer.write ("?>");
     }
 
     public XmlSerializer startTag(String namespace, String name) throws IOException {
