@@ -1,22 +1,22 @@
-/* kXML
+/* kXML 2
  *
- * The contents of this file are subject to the Enhydra Public License
- * Version 1.1 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License
- * on the Enhydra web site ( http://www.enhydra.org/ ).
+ * Copyright (C) 2000, 2001, 2002 
+ *               Stefan Haustein
+ *               D-46045 Oberhausen (Rhld.),
+ *               Germany. All Rights Reserved.
+ *
+ * The contents of this file are subject to the "Lesser GNU Public
+ * License" (LGPL); you may not use this file except in compliance
+ * with the License.
  *
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
  * the License for the specific terms governing rights and limitations
  * under the License.
  *
- * The Initial Developer of kXML is Stefan Haustein. Copyright (C)
- * 2000, 2001, 2002 Stefan Haustein, D-46045 Oberhausen (Rhld.),
- * Germany. All Rights Reserved.
- *
- * Contributor(s): Paul Palaszewski, Wilhelm Fitzpatrick, 
- *                 Eric Foster-Johnson, Michael Angel, Liam Quinn
- *
+ * Thanks to Paul Palaszewski, Wilhelm Fitzpatrick, 
+ * Eric Foster-Johnson, Michael Angel, and Liam Quinn for providing various
+ * fixes and hints for the KXML 1 parser.
  * */
 
 package org.kxml2.io;
