@@ -83,7 +83,7 @@ public class KXmlSerializer implements XmlSerializer {
 
     private final void writeEscaped(String s, int quot)
         throws IOException {
-        StringBuffer buf = new StringBuffer();
+
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             switch (c) {
