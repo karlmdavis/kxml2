@@ -15,7 +15,7 @@
  * Germany. All Rights Reserved.
  *
  * Contributor(s): Paul Palaszewski, Wilhelm Fitzpatrick, 
- *                 Eric Foster-Johnson, Michael Angel
+ *                 Eric Foster-Johnson, Michael Angel, Liam Quinn
  *
  * */
 
