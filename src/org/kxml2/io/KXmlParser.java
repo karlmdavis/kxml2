@@ -39,7 +39,7 @@ public class KXmlParser implements XmlPullParser {
 
     // general
 
-    private boolean reportNspAttr;
+ //   private boolean reportNspAttr;
     private boolean processNsp;
     private boolean relaxed;
     private Hashtable entityMap;
@@ -136,7 +136,6 @@ public class KXmlParser implements XmlPullParser {
 
                 //System.out.println (prefixMap);
 
-                if (!reportNspAttr) {
                     System.arraycopy(
                         attributes,
                         i + 4,
@@ -145,9 +144,6 @@ public class KXmlParser implements XmlPullParser {
                         ((--attributeCount) << 2) - i);
 
                     i -= 4;
-                }
-                else
-                    any = true;
             }
         }
 
@@ -159,7 +155,7 @@ public class KXmlParser implements XmlPullParser {
                 String attrName = attributes[i + 2];
                 int cut = attrName.indexOf(':');
 
-                if (cut == 0)
+                if (cut == 0 && !relaxed)
                     throw new RuntimeException(
                         "illegal attribute name: "
                             + attrName
@@ -174,7 +170,7 @@ public class KXmlParser implements XmlPullParser {
 
                     String attrNs = getNamespace(attrPrefix);
 
-                    if (attrNs == null)
+                    if (attrNs == null && !relaxed)
                         throw new RuntimeException(
                             "Undefined Prefix: "
                                 + attrPrefix
@@ -185,6 +181,7 @@ public class KXmlParser implements XmlPullParser {
                     attributes[i + 1] = attrPrefix;
                     attributes[i + 2] = attrName;
 
+					if (!relaxed) {
                     for (int j = (attributeCount << 2) - 4;
                         j > i;
                         j -= 4)
@@ -195,14 +192,14 @@ public class KXmlParser implements XmlPullParser {
                                     + attrNs
                                     + "}"
                                     + attrName);
-
+					}
                 }
             }
         }
 
         int cut = name.indexOf(':');
 
-        if (cut == 0)
+        if (cut == 0 && !relaxed)
             exception("illegal tag name: " + name);
         else if (cut != -1) {
             prefix = name.substring(0, cut);
@@ -212,7 +209,7 @@ public class KXmlParser implements XmlPullParser {
         this.namespace = getNamespace(prefix);
 
         if (this.namespace == null) {
-            if (prefix != null)
+            if (prefix != null && !relaxed)
                 exception("undefined prefix: " + prefix);
             this.namespace = NO_NAMESPACE;
         }
@@ -403,22 +400,26 @@ public class KXmlParser implements XmlPullParser {
     private final void parseEndTag()
         throws IOException, XmlPullParserException {
 
-        if (depth == 0)
-            exception("element stack empty");
-
         read(); // '<'
         read(); // '/'
         name = readName();
-
-        int sp = (depth - 1) << 2;
-
-        if (!name.equals(elementStack[sp + 3]))
-            exception("expected: " + elementStack[sp + 3]);
-
         skip();
         read('>');
 
-        namespace = elementStack[sp];
+        int sp = (depth - 1) << 2;
+
+		if (!relaxed) {
+
+	        if (depth == 0) 
+	            exception("element stack empty");
+        
+	        if (!name.equals(elementStack[sp + 3]))
+    	        exception("expected: " + elementStack[sp + 3]);
+		}
+		else if (depth == 0 || !name.equalsIgnoreCase(elementStack[sp + 3]))
+				return;
+		
+		namespace = elementStack[sp];
         prefix = elementStack[sp + 1];
         name = elementStack[sp + 2];
     }
@@ -457,8 +458,7 @@ public class KXmlParser implements XmlPullParser {
     */
 
     private final void push(int c) {
-        if ((c == '\r' || c == '\n')
-            && (!token || type == START_TAG)) {
+        if (c == '\r' || c == '\n') {
 
             if (c == '\n' && wasCR) {
                 wasCR = false;
@@ -944,12 +944,9 @@ public class KXmlParser implements XmlPullParser {
             .FEATURE_PROCESS_NAMESPACES
             .equals(feature))
             return processNsp;
-        else if (
-            XmlPullParser
-                .FEATURE_REPORT_NAMESPACE_ATTRIBUTES
-                .equals(
-                feature))
-            return reportNspAttr;
+        else if ("http://xmlpull.org/v1/doc/features.html#relaxed"
+        		.equals(feature))
+        	return relaxed;
         else
             return false;
     }
@@ -1273,12 +1270,8 @@ public class KXmlParser implements XmlPullParser {
             .FEATURE_PROCESS_NAMESPACES
             .equals(feature))
             processNsp = value;
-        else if (
-            XmlPullParser
-                .FEATURE_REPORT_NAMESPACE_ATTRIBUTES
-                .equals(
-                feature))
-            reportNspAttr = value;
+        else  if ("http://xmlpull.org/v1/doc/features.html#relaxed".equals(feature))
+        	relaxed = value;
         else
             exception("unsupported feature: " + feature);
     }
