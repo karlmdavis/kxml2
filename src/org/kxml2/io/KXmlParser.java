@@ -1192,8 +1192,14 @@ public class KXmlParser implements XmlPullParser {
         }
 
 		buf.append("@"+line + ":" + column);
-		buf.append(" in ");
-       	buf.append(location == null ? reader.toString() : location);
+		if(location != null){
+			buf.append(" in ");
+			buf.append(location);
+		}
+		else if(reader != null){
+			buf.append(" in ");
+			buf.append(reader.toString());
+		}
         return buf.toString();
     }
 
