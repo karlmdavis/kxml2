@@ -51,11 +51,15 @@
 	
         <mkdir dir="dist"/>
             
-		<jar jarfile="dist/kxml2.jar">
+    	
+		<jar jarfile="dist/kxml2.jar" >
 			<fileset dir="tmpclasses">
 				<include name="**/*.class"/>
 				<include name="META-INF/**"/>
 			</fileset>
+			<fileset dir="src">
+				<include name="META-INF/**"/>
+			</fileset>			
 		</jar>
 
 		<jar jarfile="dist/kxml2-min.jar">
