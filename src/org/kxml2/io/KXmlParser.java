@@ -25,7 +25,7 @@ import java.util.*;
 
 import org.xmlpull.v1.*;
 
-/** A simple, pull based XML parser. This classe replaces the
+/** A simple, pull based XML parser. This classe replaces the kXML 1
     XmlParser class and the corresponding event classes. */
 
 public class KXmlParser implements XmlPullParser {
