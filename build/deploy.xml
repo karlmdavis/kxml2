@@ -7,13 +7,13 @@
      <description>testdescription</description>
      <project>kxml2</project>
      <file>
-        <item href="#source" />
+        <Item href="#source" />
      </file>
   </Release>
   
-  <ReleaseFile>
+  <ReleaseFile name="source" >
      <name>kxml-source.zip</name>
-     <data href="../dist/kxml-source.zip />
+     <data href="../dist/kxml-source.zip" />
   </ReleaseFile>
   
 </il:Update>
