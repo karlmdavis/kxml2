@@ -29,12 +29,7 @@ import org.xmlpull.v1.*;
 //import com.sun.xml.parser.Parser;
 
 /** a class for converting ("binary encoding") XML to WBXML. 
- *  Todo: 
- *  <ul>
- *  <li>Add support for processing instructions 
- *  <li>Add support for tag and attribute tables
- *  <li>Add support for WBXML extensions
- *  </ul>
+ *  
  */
 
 public class WbxmlSerializer implements XmlSerializer {

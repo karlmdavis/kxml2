@@ -26,15 +26,6 @@ import java.io.*;
 
 import org.xmlpull.v1.*;
 
-/** 
- * PLEASE NOTE: Does not even compile yet
- * 
- * Still Todo: 
-   <ul>
-   <li>implement Processing Instructions</li>
-   <li>implement support for more than one codepages</li>
-   </ul>
- */
 
 public class WbxmlParser implements XmlPullParser {
 
