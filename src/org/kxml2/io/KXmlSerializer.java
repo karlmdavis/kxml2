@@ -25,13 +25,13 @@ public class KXmlSerializer implements XmlSerializer {
     static final String UNDEFINED = ":";
 
     private Writer writer;
-    private boolean pending;
 
+    private boolean pending;
+    private int auto;
     private int depth;
 
     private String[] elementStack = new String[12]; //nsp/prefix/name
     private int[] nspCounts = new int[4];
-    private int auto;
     private String[] nspStack = new String[8]; //prefix/nsp
     private boolean[] indent = new boolean[4];
 
@@ -83,18 +83,14 @@ public class KXmlSerializer implements XmlSerializer {
     			writer.write(' ');
     	}*/
 
-    public KXmlSerializer() {
-        nspCounts[0] = 1;
-        nspCounts[1] = 1;
-        nspStack[1] = "";
-    }
 
     public void docdecl(String dd) {
         throw new RuntimeException("NYI");
     }
 
     public void endDocument() throws IOException {
-        check();
+        flush();
+        if (depth != 0) throw new IllegalStateException ();
     }
 
     public void entityRef(String name) throws IOException {
@@ -168,7 +164,7 @@ public class KXmlSerializer implements XmlSerializer {
         throw new RuntimeException("Unsupported Property:" + value);
     }
 
-    public void setPrefix(String prefix, String namespace) {
+    public void setPrefix(String namespace, String prefix) {
 
         String defined = getPrefix(namespace, true, false);
 
@@ -191,14 +187,30 @@ public class KXmlSerializer implements XmlSerializer {
 
     public void setOutput(Writer writer) {
         this.writer = writer;
+
+       // elementStack = new String[12]; //nsp/prefix/name
+        //nspCounts = new int[4];
+        //nspStack = new String[8]; //prefix/nsp
+        //indent = new boolean[4];
+    
+
+        nspCounts[0] = 1;
+        nspCounts[1] = 1;
+        nspStack[1] = "";
+        nspStack[0] = null;
+        pending = false;
+        auto = 0;
+        depth = 0;
+        
     }
 
     public void setOutput(OutputStream os, String encoding)
         throws IOException {
-        this.writer =
+        if (os == null) throw new IllegalArgumentException ();
+        setOutput(
             encoding == null
                 ? new OutputStreamWriter(os)
-                : new OutputStreamWriter(os, encoding);
+                : new OutputStreamWriter(os, encoding));
     }
 
     public void startDocument(String encoding, Boolean standalone)
@@ -208,6 +220,9 @@ public class KXmlSerializer implements XmlSerializer {
 
     public XmlSerializer startTag(String namespace, String name) throws IOException {
         check();
+        
+        if (namespace==null) namespace="";
+        
         if (indent[depth]) {
             writer.write("\r\n");
             for (int i = 0; i < depth; i++)
@@ -268,6 +283,7 @@ public class KXmlSerializer implements XmlSerializer {
             throw new IllegalStateException("illegal position for attribute");
 
         int cnt = nspCounts[depth];
+        if (namespace==null) namespace="";
 
         String prefix = (namespace == null || "".equals (namespace)) 
         	? null 
@@ -313,6 +329,7 @@ public class KXmlSerializer implements XmlSerializer {
     public XmlSerializer endTag(String namespace, String name) throws IOException {
 
         depth--;
+        if (namespace==null) namespace="";
 
         if (!elementStack[depth * 3].equals(namespace)
             || !elementStack[depth * 3 + 2].equals(name))

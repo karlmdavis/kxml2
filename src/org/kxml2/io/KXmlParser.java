@@ -810,11 +810,14 @@ public class KXmlParser implements XmlPullParser {
         entityMap.put("quot", "\"");
     }
 
-    public void setInput(InputStream is, String enc)
+    public void setInput(InputStream is, String _enc)
         throws XmlPullParserException {
 
         srcPos = 0;
         srcCount = 0;
+        String enc = _enc;
+
+        if (is == null) throw new IllegalArgumentException ();
 
         try {
 
@@ -930,9 +933,9 @@ public class KXmlParser implements XmlPullParser {
             if (enc == null)
                 enc = "UTF-8";
                 
-            encoding = enc;
             int sc = srcCount;
             setInput(new InputStreamReader(is, enc));
+            encoding = _enc;
             srcCount = sc;
         }
         catch (Exception e) {

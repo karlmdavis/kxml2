@@ -275,7 +275,7 @@ public class Element extends Node {
 
 		if (prefixes != null) {
 			for (int i = 0; i < prefixes.size (); i++) {
-				writer.setPrefix (getNamespacePrefix (i), getNamespaceUri (i));
+				writer.setPrefix (getNamespaceUri (i), getNamespacePrefix (i));
 			}
 		}
 
