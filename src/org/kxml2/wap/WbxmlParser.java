@@ -740,9 +740,9 @@ public class WbxmlParser implements XmlPullParser {
 
                     wapExtensionData = buf;
                 } // case OPAQUE
+                default:
+                exception("illegal id: "+id);
         } // SWITCH
-
-        throw new IOException("illegal id!");
     }
 
     public void readAttr() throws IOException, XmlPullParserException {

@@ -38,6 +38,8 @@
 		  <fileset dir=".">
 		    <include name="*/**" />
 		    <exclude name=".*" />
+		    <exclude name="classes/**" />
+		    <exclude name="tmpclasses/**" />
 		    <exclude name="dist/kxml2-src.zip"/>
 		   </fileset>
 		</zip>    
