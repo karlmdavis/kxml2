@@ -91,14 +91,17 @@ public class KXmlSerializer implements XmlSerializer {
 
 
     public void docdecl(String dd) throws IOException{
-        writer.write("<!DOCTYPE ");
+        writer.write("<!DOCTYPE");
         writer.write(dd);
         writer.write(">");
     }
 
     public void endDocument() throws IOException {
+        while (depth > 0) {
+            endTag (elementStack[depth * 3 -3], 
+            elementStack[depth * 3 -1]);
+        }
         flush();
-        if (depth != 0) throw new IllegalStateException ();
     }
 
     public void entityRef(String name) throws IOException {
@@ -416,9 +419,9 @@ public class KXmlSerializer implements XmlSerializer {
 
     public void cdsect(String data) throws IOException {
         check();
-        writer.write("<![CDSECT");
+        writer.write("<![CDATA[");
         writer.write(data);
-        writer.write("]>");
+        writer.write("]]>");
     }
 
     public void comment(String comment) throws IOException {
@@ -432,6 +435,6 @@ public class KXmlSerializer implements XmlSerializer {
         check();
         writer.write("<?");
         writer.write(pi);
-        writer.write('>');
+        writer.write("?>");
     }
 }

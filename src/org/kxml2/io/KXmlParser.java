@@ -38,6 +38,9 @@ public class KXmlParser implements XmlPullParser {
 
     // general
 
+    private String version;
+    private Boolean standalone;
+
     //   private boolean reportNspAttr;
     private boolean processNsp;
     private boolean relaxed;
@@ -228,7 +231,7 @@ public class KXmlParser implements XmlPullParser {
         if (type == END_TAG)
             depth--;
 
-        do {
+        while(true) {
             attributeCount = -1;
 
             if (degenerated) {
@@ -248,18 +251,18 @@ public class KXmlParser implements XmlPullParser {
 
                 case ENTITY_REF :
                     pushEntity();
-                    break;
+                    return;
 
                 case START_TAG :
                     parseStartTag(false);
-                    break;
+                    return;
 
                 case END_TAG :
                     parseEndTag();
-                    break;
+                    return;
 
                 case END_DOCUMENT :
-                    break;
+                    return;
 
                 case TEXT :
                     pushText('<', !token);
@@ -270,15 +273,14 @@ public class KXmlParser implements XmlPullParser {
                         //	else 
                         //    exception ("text '"+getText ()+"' not allowed outside root element");
                     }
-                    break;
+                    return;
 
                 default :
                     type = parseLegacy(token);
-                    if (type == XML_DECL)
-                        continue;
+                    if (type != XML_DECL)
+                        return;
             }
         }
-        while (false);
     }
 
     private final int parseLegacy(boolean push)
@@ -312,6 +314,26 @@ public class KXmlParser implements XmlPullParser {
 
                     if (attributeCount < 1 || !"version".equals(attributes[2]))
                         exception("version expected");
+
+                    version = attributes[3];
+
+                    int pos = 1;
+
+                    if (pos < attributeCount && "encoding".equals (attributes[2+4]))  {
+                        encoding = attributes[3+4];
+                        pos++;                        
+                    }
+
+                    if (pos < attributeCount && "standalone".equals (attributes[4*pos+2])) {
+                        String st = attributes[3+4*pos];
+                        if ("yes".equals(st)) standalone = new Boolean(true);
+                        else if ("no".equals(st)) standalone = new Boolean(false);
+                        else exception ("illegal standalone value: "+st);
+                        pos++;
+                    }
+
+                    if (pos != attributeCount) 
+                        exception("illegal xmldecl");
 
                     isWhitespace = true;
                     txtPos = 0;                    
@@ -392,6 +414,8 @@ public class KXmlParser implements XmlPullParser {
 
         int nesting = 1;
         boolean quoted = false;
+
+       // read();
 
         while (true) {
             int i = read();
@@ -813,6 +837,8 @@ public class KXmlParser implements XmlPullParser {
         degenerated = false;
         attributeCount = -1;
         encoding = null;
+        version = null;
+        standalone= null;
 
         if (reader == null)
             return;
@@ -974,6 +1000,10 @@ public class KXmlParser implements XmlPullParser {
     }
 
     public Object getProperty(String property) {
+        if ("http://xmlpull.org/v1/doc/properties.html#xmldecl-version".equals(property))
+            return version;
+        if ("http://xmlpull.org/v1/doc/properties.html#xmldecl-standalone".equals(property))            
+            return standalone;
         return null;
     }
 
