@@ -15,7 +15,7 @@
  * Germany. All Rights Reserved.
  *
  * Contributor(s): Paul Palaszewski, Wilhelm Fitzpatrick, 
- *                 Eric Foster-Johnson, Michael Angel
+ *                 Eric Foster-Johnson, Michael Angel, Liam Quinn
  *
  * */
 
@@ -607,6 +607,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    line++;
 	    column = 0;
 	    if (r == '\r' && peek0 == '\n')
+		r = '\n';
 		peek0 = 0;
 	}
 	column++;
