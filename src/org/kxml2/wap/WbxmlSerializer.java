@@ -26,11 +26,14 @@ import java.util.*;
 
 import org.xmlpull.v1.*;
 
-//import com.sun.xml.parser.Parser;
+// TODO: make some of the "direct" WBXML token writing methods public??
 
-/** a class for converting ("binary encoding") XML to WBXML. 
+/** 
+ * A class for writing WBXML. 
  *  
  */
+
+
 
 public class WbxmlSerializer implements XmlSerializer {
 
@@ -130,7 +133,7 @@ public class WbxmlSerializer implements XmlSerializer {
     }
 
 
-    /** ATTENTION: flush cannot work since Wbxml documents cannot
+    /** ATTENTION: flush cannot work since Wbxml documents require
     need buffering. Thus, this call does nothing. */
 
     public void flush() {
@@ -221,12 +224,12 @@ public class WbxmlSerializer implements XmlSerializer {
 
 
     public void setOutput (Writer writer) {
-        throw new RuntimeException ("Wbxml requires an outputstream, no writer");
+        throw new RuntimeException ("Wbxml requires an OutputStream!");
     }
 
     public void setOutput (OutputStream out, String encoding) throws IOException {
         
-        if (encoding != null) throw new IllegalArgumentException ("encoding not supported for WBXML");
+        if (encoding != null) throw new IllegalArgumentException ("encoding not yet supported for WBXML");
         
         this.out = out;
 
@@ -396,7 +399,5 @@ public class WbxmlSerializer implements XmlSerializer {
                 this.attrValueTable.put(attrValueTable[i], idx);
             }
         }
-        if (page != 0)
-            throw new RuntimeException("code pages curr. not supp.");
     }
 }
