@@ -30,7 +30,8 @@ import org.xmlpull.v1.*;
 
 public class KXmlParser implements XmlPullParser {
 
-    static final private String UNEXPECTED_EOF = "Unexpected EOF";
+    private Object location;
+	static final private String UNEXPECTED_EOF = "Unexpected EOF";
     static final private String ILLEGAL_TYPE = "Wrong event type";
     static final private int LEGACY = 999;
     static final private int XML_DECL = 998;
@@ -1102,6 +1103,8 @@ public class KXmlParser implements XmlPullParser {
             return version;
         if (isProp(property, true, "xmldecl-standalone"))
             return standalone;
+		if (isProp(property, true, "location"))            
+			return location != null ? location : reader.toString();
         return null;
     }
 
@@ -1181,7 +1184,9 @@ public class KXmlParser implements XmlPullParser {
             buf.append(text);
         }
 
-        buf.append(" @" + line + ":" + column);
+		buf.append("@"+line + ":" + column);
+		buf.append(" in ");
+       	buf.append(location == null ? reader.toString() : location);
         return buf.toString();
     }
 
@@ -1381,7 +1386,10 @@ public class KXmlParser implements XmlPullParser {
 
     public void setProperty(String property, Object value)
         throws XmlPullParserException {
-        throw new XmlPullParserException("unsupported property: " + property);
+        if(isProp(property, true, "location"))
+        	location = value;
+        else
+	        throw new XmlPullParserException("unsupported property: " + property);
     }
 
     /**
