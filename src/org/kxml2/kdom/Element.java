@@ -237,7 +237,27 @@ public class Element extends Node {
      * Sets the given attribute; a value of null removes the attribute */
 
 	public void setAttribute (String namespace, String name, String value) {
-		if (attributes == null) attributes = new Vector ();
+		if (attributes == null) 
+			attributes = new Vector ();
+
+		if (namespace == null) 
+			namespace = "";
+		
+        for (int i = attributes.size()-1; i >=0; i--){
+            String[] attribut = (String[]) attributes.elementAt(i);
+            if (attribut[0].equals(namespace) &&
+				attribut[1].equals(name)){
+					
+				if (value == null) {
+	                attributes.removeElementAt(i);
+				}
+				else {
+					attribut[2] = value;
+				}
+	            return; 
+			}
+        }
+
 		attributes.addElement 
 			(new String [] {namespace, name, value});
 	}
