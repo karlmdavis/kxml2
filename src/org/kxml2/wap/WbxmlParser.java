@@ -433,7 +433,8 @@ public class WbxmlParser implements XmlPullParser {
                 buf.append((char) readByte());
 	        stringTable = buf.toString();
 	        
-	        selectPage(0);
+	        selectPage(0, true);
+			selectPage(0, false);
         }
         catch (IOException e) {
             exception("Illegal input format");
@@ -595,15 +596,18 @@ public class WbxmlParser implements XmlPullParser {
     }
 
 
-	private void selectPage(int nr) throws XmlPullParserException{
+	private void selectPage(int nr, boolean tags) throws XmlPullParserException{
 		if(tables.size() == 0 && nr == 0) return;
 		
 		if(nr*3 > tables.size())
 			exception("Code Page "+nr+" undefined!");
 		
-		tagTable = (String[]) tables.elementAt(nr * 3 + TAG_TABLE);
-		attrStartTable = (String[]) tables.elementAt(nr * 3 + ATTR_START_TABLE);
-		attrValueTable = (String[]) tables.elementAt(nr * 3 + ATTR_VALUE_TABLE);
+		if(tags)
+			tagTable = (String[]) tables.elementAt(nr * 3 + TAG_TABLE);
+		else {
+			attrStartTable = (String[]) tables.elementAt(nr * 3 + ATTR_START_TABLE);
+			attrValueTable = (String[]) tables.elementAt(nr * 3 + ATTR_VALUE_TABLE);
+		}
 	}
 
     private final void nextImpl()
@@ -633,7 +637,7 @@ public class WbxmlParser implements XmlPullParser {
                 break;
 
             case Wbxml.SWITCH_PAGE :
-                selectPage(readByte());
+                selectPage(readByte(), true);
                 break;
 
             case Wbxml.END :
@@ -741,7 +745,7 @@ public class WbxmlParser implements XmlPullParser {
         throw new IOException("illegal id!");
     }
 
-    public void readAttr() throws IOException {
+    public void readAttr() throws IOException, XmlPullParserException {
 
         int id = readByte();
         int i = 0;
@@ -763,6 +767,7 @@ public class WbxmlParser implements XmlPullParser {
 
             id = readByte();
             while (id > 128
+            	|| id == Wbxml.SWITCH_PAGE
                 || id == Wbxml.ENTITY
                 || id == Wbxml.STR_I
                 || id == Wbxml.STR_T
@@ -770,6 +775,10 @@ public class WbxmlParser implements XmlPullParser {
                 || (id >= Wbxml.EXT_T_0 && id <= Wbxml.EXT_T_2)) {
 
                 switch (id) {
+					case Wbxml.SWITCH_PAGE :
+						selectPage(readByte(), false);
+						break;
+                	
                     case Wbxml.ENTITY :
                         value.append((char) readInt());
                         break;

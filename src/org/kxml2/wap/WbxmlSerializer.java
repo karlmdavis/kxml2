@@ -51,6 +51,9 @@ public class WbxmlSerializer implements XmlSerializer {
     Hashtable attrValueTable = new Hashtable();
     Hashtable tagTable = new Hashtable();
 
+	private int attrPage;
+	private int tagPage;
+
 
     public XmlSerializer attribute(String namespace, String name, String value) {
         attributes.addElement(name);
@@ -140,7 +143,7 @@ public class WbxmlSerializer implements XmlSerializer {
 
         int len = attributes.size();
 
-        Integer idx = (Integer) tagTable.get(pending);
+        int[] idx = (int[]) tagTable.get(pending);
 
         // if no entry in known table, then add as literal
         if (idx == null) {
@@ -152,31 +155,48 @@ public class WbxmlSerializer implements XmlSerializer {
             writeStrT(pending);
         }
         else {
+        	if(idx[0] != tagPage){
+        		tagPage=idx[0];
+        		buf.write(0);
+        		buf.write(tagPage);
+        	}
+        	
             buf.write(
                 len == 0
-                    ? (degenerated ? idx.intValue() : idx.intValue() | 64)
+                    ? (degenerated ? idx[1] : idx[1] | 64)
                     : (degenerated
-                        ? idx.intValue() | 128
-                        : idx.intValue() | 192));
+                        ? idx[1] | 128
+                        : idx[1] | 192));
 
         }
 
         for (int i = 0; i < len;) {
-            idx = (Integer) attrStartTable.get(attributes.elementAt(i));
+            idx = (int[]) attrStartTable.get(attributes.elementAt(i));
+            
             if (idx == null) {
                 buf.write(Wbxml.LITERAL);
                 writeStrT((String) attributes.elementAt(i));
             }
             else {
-                buf.write(idx.intValue());
+				if(idx[0] != attrPage){
+					attrPage = idx[1];
+					buf.write(0);
+					buf.write(attrPage);					
+				}
+                buf.write(idx[1]);
             }
-            idx = (Integer) attrValueTable.get(attributes.elementAt(++i));
+            idx = (int[]) attrValueTable.get(attributes.elementAt(++i));
             if (idx == null) {
                 buf.write(Wbxml.STR_I);
                 writeStrI(buf, (String) attributes.elementAt(i));
             }
             else {
-                buf.write(idx.intValue());
+				if(idx[0] != attrPage){
+					attrPage = idx[1];
+					buf.write(0);
+					buf.write(attrPage);					
+				}
+                buf.write(idx[1]);
             }
             ++i;
         }
@@ -327,51 +347,52 @@ public class WbxmlSerializer implements XmlSerializer {
         writeInt(buf, idx.intValue());
     }
 
-    /** Sets the tag table for a given page.
-     *	The first string in the array defines tag 5, the second tag 6 etc.
-     *  Currently, only page 0 is supported
+    /** 
+     * Sets the tag table for a given page.
+     * The first string in the array defines tag 5, the second tag 6 etc.
      */
+    
     public void setTagTable(int page, String[] tagTable) {
         // clear entries in tagTable!
+		if (page != 0)
+			return;
+
         for (int i = 0; i < tagTable.length; i++) {
             if (tagTable[i] != null) {
-                Integer idx = new Integer(i + 5);
+                Object idx = new int[]{page, i+5};
                 this.tagTable.put(tagTable[i], idx);
             }
         }
-        if (page != 0)
-            throw new RuntimeException("code pages curr. not supp.");
     }
 
-    /** Sets the attribute start Table for a given page.
-     *	The first string in the array defines attribute 
-     *  5, the second attribute 6 etc.
-     *  Currently, only page 0 is supported. Please use the 
+    /** 
+     * Sets the attribute start Table for a given page.
+     * The first string in the array defines attribute 
+     * 5, the second attribute 6 etc.
+     *  Please use the 
      *  character '=' (without quote!) as delimiter 
      *  between the attribute name and the (start of the) value 
      */
     public void setAttrStartTable(int page, String[] attrStartTable) {
-        // clear entries in this.table!
+        
         for (int i = 0; i < attrStartTable.length; i++) {
             if (attrStartTable[i] != null) {
-                Integer idx = new Integer(i + 5);
+                Object idx = new int[] {page, i + 5};
                 this.attrStartTable.put(attrStartTable[i], idx);
             }
         }
-        if (page != 0)
-            throw new RuntimeException("code pages curr. not supp.");
     }
 
-    /** Sets the attribute value Table for a given page.
-     *	The first string in the array defines attribute value 0x85, 
-     *  the second attribute value 0x86 etc.
-     *  Currently, only page 0 is supported.
+    /** 
+     * Sets the attribute value Table for a given page.
+     * The first string in the array defines attribute value 0x85, 
+     * the second attribute value 0x86 etc.
      */
     public void setAttrValueTable(int page, String[] attrValueTable) {
         // clear entries in this.table!
         for (int i = 0; i < attrValueTable.length; i++) {
             if (attrValueTable[i] != null) {
-                Integer idx = new Integer(i + 0x085);
+                Object idx = new int[]{page, i + 0x085};
                 this.attrValueTable.put(attrValueTable[i], idx);
             }
         }
