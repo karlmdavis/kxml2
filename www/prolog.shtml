@@ -3,18 +3,18 @@
   <td valign="top">
    <table width="100%" cellpadding="10px">
     <tr>
-     <td bgcolor="#8888ff"><b>kXML</b></td>
+     <td bgcolor="#8888ff"><b><i><font color="#cccccc">k</font></i><font color="#ffffff">XML</font></b></td>
     </tr>
 
     <tr>
-     <td bgcolor="#ccccff">
+     <td bgcolor="#ddddff">
        <a href="/index.shtml">News</a><br />
        <a href="/about.shtml">About</a>
      </td>
     </tr>
     
     <tr>
-     <td bgcolor="#ccccff">kXML 2</a>
+     <td bgcolor="#ddddff">kXML 2</a>
       <small>
        <ul>
         <li><a href="/kxml2/">Documentation</a></li>
@@ -26,7 +26,7 @@
     </tr>
  
     <tr>
-     <td bgcolor="#ccccff">kXML 3</a>
+     <td bgcolor="#ddddff">kXML 3</a>
       <small>
        <ul>
         <li><a href="/kxml3/index.shtml">Plan</a></li>
@@ -37,7 +37,7 @@
 
 
     <tr>
-     <td bgcolor="#ccccff"> 
+     <td bgcolor="#ddddff"> 
 	  <a href="http://sourceforge.net/projects/kxml/">Development</a>
       <small>
 	   <ul>
@@ -52,7 +52,7 @@
 	</tr>
 
     <tr>
-     <td bgcolor="#ccccff">Links
+     <td bgcolor="#ddddff">Links
       <small>
        <ul>
 	    <li><a href="http://kobjects.org">kObjects</a></li>
@@ -64,7 +64,7 @@
     </tr>
 
 	<tr>
-	 <td bgcolor="#ccccff">
+	 <td bgcolor="#ddddff">
 	  <a href="http://sourceforge.net/projects/kxml/"><img src="http://sourceforge.net/sflogo.php?group_id=9157&amp;type=2" alt="SF Logo" /></a>
      </td>
     </tr>
