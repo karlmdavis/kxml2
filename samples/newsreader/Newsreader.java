@@ -64,7 +64,7 @@ public class Newsreader extends MIDlet implements CommandListener {
 				parser.require(parser.START_TAG, null, null);
 				String name = parser.getName();
 
-				String text = parser.nextText();
+				String text = parser.nextElementText();
 
 				System.out.println ("<"+name+">"+text);
 
@@ -113,8 +113,9 @@ public class Newsreader extends MIDlet implements CommandListener {
 
 	public void destroyApp(boolean really) {
 	}
-
+/*
 	public static void main(String[] argv) {
 		org.me4se.MIDletRunner.main (new String [] {"Newsreader"});
 	}
+*/
 }

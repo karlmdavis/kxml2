@@ -218,7 +218,7 @@ public class KXmlParser implements XmlPullParser {
 
 		attributeCount = -1;
 
-		if (degenerated) {
+		if (degenerated) { 
 			degenerated = false;
 			depth--;
 			type = END_TAG;
@@ -1012,7 +1012,7 @@ public class KXmlParser implements XmlPullParser {
 			exception("expected: " + TYPES[type] + " {" + namespace + "}" + name);
 	}
 
-	public String nextText() throws XmlPullParserException, IOException {
+	public String nextElementText() throws XmlPullParserException, IOException {
 		if (type != START_TAG)
 			exception("precondition: START_TAG");
 
