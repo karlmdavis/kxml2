@@ -263,9 +263,9 @@ public class KXmlSerializer implements XmlSerializer {
     }
 
     public XmlSerializer attribute(String namespace, String name, String value)
-        throws IOException {
+        throws IOException, XmlPullParserException {
         if (!pending)
-            throw new RuntimeException("illegal position for attribute");
+            throw new XmlPullParserException("illegal position for attribute");
 
         int cnt = nspCounts[depth];
 
@@ -310,13 +310,13 @@ public class KXmlSerializer implements XmlSerializer {
     		writer.close();
     	}
     */
-    public XmlSerializer endTag(String namespace, String name) throws IOException {
+    public XmlSerializer endTag(String namespace, String name) throws IOException, XmlPullParserException {
 
         depth--;
 
         if (!elementStack[depth * 3].equals(namespace)
             || !elementStack[depth * 3 + 2].equals(name))
-            throw new RuntimeException("start/end tag mismatch");
+            throw new XmlPullParserException("start/end tag mismatch");
 
         if (pending) {
             writer.write(" />");

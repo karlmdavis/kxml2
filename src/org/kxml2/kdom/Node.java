@@ -319,7 +319,7 @@ public class Node { //implements XmlIO{
         stream is flushed automatically. */
 
     public void write(XmlSerializer writer)
-        throws IOException {
+        throws IOException, XmlPullParserException {
         writeChildren(writer);
         writer.flush();
     }
@@ -327,7 +327,7 @@ public class Node { //implements XmlIO{
     /** Writes the children of this node to the given XmlWriter. */
 
     public void writeChildren(XmlSerializer writer)
-        throws IOException {
+        throws IOException, XmlPullParserException {
         if (children == null)
             return;
 
