@@ -1012,7 +1012,7 @@ public class KXmlParser implements XmlPullParser {
 			exception("expected: " + TYPES[type] + " {" + namespace + "}" + name);
 	}
 
-	public String nextElementText() throws XmlPullParserException, IOException {
+	public String nextText() throws XmlPullParserException, IOException {
 		if (type != START_TAG)
 			exception("precondition: START_TAG");
 
