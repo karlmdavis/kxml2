@@ -962,6 +962,8 @@ public class KXmlParser implements XmlPullParser {
         String entity,
         String value)
         throws XmlPullParserException {
+            if (entityMap == null) throw new RuntimeException 
+            ("entity replacement text must be defined after setInput!");
         entityMap.put(entity, value);
     }
 
