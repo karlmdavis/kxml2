@@ -39,19 +39,46 @@ public class KXmlSerializer implements XmlSerializer {
     private boolean unicode;
     private String encoding;
 
-    private final void check() throws IOException {
+    private final void check(boolean close) throws IOException {
         if (!pending)
             return;
-        writer.write(">");
+
+        depth++;
         pending = false;
 
-        if (nspCounts.length < depth + 2) {
-            int[] hlp = new int[depth + 5];
+        if (indent.length <= depth) {
+            boolean[] hlp = new boolean[depth + 4];
+            System.arraycopy(indent, 0, hlp, 0, depth);
+            indent = hlp;
+        }
+        indent[depth] = indent[depth - 1];
+
+        for (int i = nspCounts[depth - 1];
+            i < nspCounts[depth];
+            i++) {
+            writer.write(' ');
+            writer.write("xmlns");
+            if (!"".equals(nspStack[i * 2])) {
+                writer.write(':');
+                writer.write(nspStack[i * 2]);
+            }
+            else if (getNamespace().equals(""))
+                throw new IllegalStateException("Cannot set default namespace for elements in no namespace");
+            writer.write("=\"");
+            writeEscaped(nspStack[i * 2 + 1], '"');
+            writer.write('"');
+        }
+
+        if (nspCounts.length <= depth + 1) {
+            int[] hlp = new int[depth + 8];
             System.arraycopy(nspCounts, 0, hlp, 0, depth + 1);
             nspCounts = hlp;
         }
 
         nspCounts[depth + 1] = nspCounts[depth];
+        //   nspCounts[depth + 2] = nspCounts[depth];
+
+        writer.write(close ? " />" : ">");
     }
 
     private final void writeEscaped(String s, int quot)
@@ -109,7 +136,7 @@ public class KXmlSerializer implements XmlSerializer {
     }
 
     public void entityRef(String name) throws IOException {
-        check();
+        check(false);
         writer.write('&');
         writer.write(name);
         writer.write(';');
@@ -140,12 +167,14 @@ public class KXmlSerializer implements XmlSerializer {
         boolean create)
         throws IOException {
 
-        for (int i = nspCounts[depth+1] * 2 - 2; i >= 0; i -= 2) {
+        for (int i = nspCounts[depth + 1] * 2 - 2;
+            i >= 0;
+            i -= 2) {
             if (nspStack[i + 1].equals(namespace)
                 && (includeDefault || !nspStack[i].equals(""))) {
                 String cand = nspStack[i];
                 for (int j = i + 2;
-                    j < nspCounts[depth+1] * 2;
+                    j < nspCounts[depth + 1] * 2;
                     j++) {
                     if (nspStack[j].equals(cand)) {
                         cand = null;
@@ -167,7 +196,7 @@ public class KXmlSerializer implements XmlSerializer {
         else {
             do {
                 prefix = "n" + (auto++);
-                for (int i = nspCounts[depth+1] * 2 - 2;
+                for (int i = nspCounts[depth + 1] * 2 - 2;
                     i >= 0;
                     i -= 2) {
                     if (prefix.equals(nspStack[i])) {
@@ -178,7 +207,11 @@ public class KXmlSerializer implements XmlSerializer {
             }
             while (prefix == null);
         }
+
+		boolean p = pending;
+		pending = false;
         setPrefix(prefix, namespace);
+        pending = p;
         return prefix;
     }
 
@@ -208,7 +241,7 @@ public class KXmlSerializer implements XmlSerializer {
     public void setPrefix(String prefix, String namespace)
         throws IOException {
 
-        check();
+        check(false);
         if (prefix == null)
             prefix = "";
         if (namespace == null)
@@ -297,10 +330,10 @@ public class KXmlSerializer implements XmlSerializer {
 
     public XmlSerializer startTag(String namespace, String name)
         throws IOException {
-        check();
+        check(false);
 
-//        if (namespace == null)
-//            namespace = "";
+        //        if (namespace == null)
+        //            namespace = "";
 
         if (indent[depth]) {
             writer.write("\r\n");
@@ -316,17 +349,20 @@ public class KXmlSerializer implements XmlSerializer {
             elementStack = hlp;
         }
 
-        String prefix = namespace == null ? "" : getPrefix(namespace, true, true);
+        String prefix =
+            namespace == null
+                ? ""
+                : getPrefix(namespace, true, true);
 
-        depth++;
-
-        if (indent.length <= depth) {
-            boolean[] hlp = new boolean[depth + 4];
-            System.arraycopy(indent, 0, hlp, 0, depth);
-            indent = hlp;
+        if ("".equals(namespace)) {
+            for (int i = nspCounts[depth];
+                i < nspCounts[depth + 1];
+                i++) {
+                if ("".equals(nspStack[i * 2])) {
+                    throw new IllegalStateException("Cannot set default namespace for elements in no namespace");
+                }
+            }
         }
-        indent[depth] = indent[depth - 1];
-
 
         elementStack[esp++] = namespace;
         elementStack[esp++] = prefix;
@@ -339,22 +375,6 @@ public class KXmlSerializer implements XmlSerializer {
         }
 
         writer.write(name);
-
-        for (int i = nspCounts[depth - 1];
-            i < nspCounts[depth];
-            i++) {
-            writer.write(' ');
-            writer.write("xmlns");
-            if (!"".equals(nspStack[i * 2])) {
-                writer.write(':');
-                writer.write(nspStack[i * 2]);
-            }
-			else if (namespace.equals("")) 
-				throw new IllegalStateException ("Cannot set default namespace for elements in no namespace");
-            writer.write("=\"");
-            writeEscaped(nspStack[i * 2 + 1], '"');
-            writer.write('"');
-        }
 
         pending = true;
 
@@ -369,33 +389,34 @@ public class KXmlSerializer implements XmlSerializer {
         if (!pending)
             throw new IllegalStateException("illegal position for attribute");
 
-        int cnt = nspCounts[depth];
-        
+        //        int cnt = nspCounts[depth];
+
         if (namespace == null)
             namespace = "";
 
-		depth--;
-		pending = false;
+        //		depth--;
+        //		pending = false;
 
         String prefix =
             "".equals(namespace)
                 ? ""
                 : getPrefix(namespace, false, true);
 
-		pending = true;
-		depth++;
+        //		pending = true;
+        //		depth++;
 
-        if (cnt != nspCounts[depth]) {
-            writer.write(' ');
-            writer.write("xmlns");
-            if (nspStack[cnt * 2] != null) {
-                writer.write(':');
-                writer.write(nspStack[cnt * 2]);
-            }
-            writer.write("=\"");
-            writeEscaped(nspStack[cnt * 2 + 1], '"');
-            writer.write('"');
-        }
+        /*        if (cnt != nspCounts[depth]) {
+                    writer.write(' ');
+                    writer.write("xmlns");
+                    if (nspStack[cnt * 2] != null) {
+                        writer.write(':');
+                        writer.write(nspStack[cnt * 2]);
+                    }
+                    writer.write("=\"");
+                    writeEscaped(nspStack[cnt * 2 + 1], '"');
+                    writer.write('"');
+                }
+                */
 
         writer.write(' ');
         if (!"".equals(prefix)) {
@@ -413,7 +434,7 @@ public class KXmlSerializer implements XmlSerializer {
     }
 
     public void flush() throws IOException {
-        check();
+        check(false);
         writer.flush();
     }
     /*
@@ -425,18 +446,21 @@ public class KXmlSerializer implements XmlSerializer {
     public XmlSerializer endTag(String namespace, String name)
         throws IOException {
 
-        depth--;
-//        if (namespace == null)
-  //          namespace = "";
+        if (!pending)
+            depth--;
+        //        if (namespace == null)
+        //          namespace = "";
 
-        if ((namespace == null && elementStack[depth * 3] != null)
-         || (namespace != null && !namespace.equals(elementStack[depth * 3]))
-         || !elementStack[depth * 3 + 2].equals(name))
+        if ((namespace == null
+            && elementStack[depth * 3] != null)
+            || (namespace != null
+                && !namespace.equals(elementStack[depth * 3]))
+            || !elementStack[depth * 3 + 2].equals(name))
             throw new IllegalArgumentException("start/end tag mismatch");
 
         if (pending) {
-            writer.write(" />");
-            pending = false;
+            check(true);
+            depth--;
         }
         else {
             if (indent[depth + 1]) {
@@ -459,21 +483,20 @@ public class KXmlSerializer implements XmlSerializer {
         return this;
     }
 
-	public String getNamespace() {
-		return depth == 0 ? null : elementStack [depth*3-3];	
-	}
-	
-	public String getName() {
-		return depth == 0 ? null : elementStack [depth*3-1];	
-	}
-	
-	public int getDepth() {
-		return depth;
-	}
+    public String getNamespace() {
+        return getDepth() == 0 ? null : elementStack[getDepth() * 3 - 3];
+    }
 
+    public String getName() {
+        return getDepth() == 0 ? null : elementStack[getDepth() * 3 - 1];
+    }
+
+    public int getDepth() {
+        return pending ? depth + 1 : depth;
+    }
 
     public XmlSerializer text(String text) throws IOException {
-        check();
+        check(false);
         indent[depth] = false;
         writeEscaped(text, -1);
         return this;
@@ -486,14 +509,14 @@ public class KXmlSerializer implements XmlSerializer {
     }
 
     public void cdsect(String data) throws IOException {
-        check();
+        check(false);
         writer.write("<![CDATA[");
         writer.write(data);
         writer.write("]]>");
     }
 
     public void comment(String comment) throws IOException {
-        check();
+        check(false);
         writer.write("<!--");
         writer.write(comment);
         writer.write("-->");
@@ -501,7 +524,7 @@ public class KXmlSerializer implements XmlSerializer {
 
     public void processingInstruction(String pi)
         throws IOException {
-        check();
+        check(false);
         writer.write("<?");
         writer.write(pi);
         writer.write("?>");
