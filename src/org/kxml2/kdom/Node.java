@@ -241,7 +241,8 @@ public class Node { //implements XmlIO{
         boolean leave = false;
 
         do {
-            switch (parser.getEventType()) {
+        	int type = parser.getEventType ();
+            switch (type) {
 
                 case XmlPullParser.START_TAG :
                     {
@@ -264,11 +265,13 @@ public class Node { //implements XmlIO{
                     leave = true;
                     break;
 	
+	
                 default :
 					if (parser.getText () == null) 
 					 	throw new RuntimeException (parser.getPositionDescription());
 
-                    addChild(parser.getEventType(), parser.getText());
+                    addChild(type == XmlPullParser.ENTITY_REF ? TEXT : type, 
+                    		parser.getText());
                     parser.nextToken();
             }
         }
