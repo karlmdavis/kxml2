@@ -22,6 +22,8 @@ import org.xmlpull.v1.serializer.*;
 
 public class KXmlSerializer implements XmlSerializer {
 
+	static final String UNDEFINED = ":";
+
 	private Writer writer;
 	private boolean pending;
 
@@ -31,6 +33,7 @@ public class KXmlSerializer implements XmlSerializer {
 	private int[] nspCounts = new int[4];
 	private int auto;
 	private String[] nspStack = new String[8];  //prefix/nsp
+	private boolean[]indent = new boolean[4];
 
 	private final void check() throws IOException {
 		if (!pending) return;
@@ -46,24 +49,25 @@ public class KXmlSerializer implements XmlSerializer {
 		nspCounts [depth+1] = nspCounts[depth];
 	}
 
+
 	private final void writeEscaped(String s, int quot) throws IOException {
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
 			switch (c) {
 				case '&' :
-					writer.write("&amp");
+					writer.write("&amp;");
 					break;
 				case '>' :
-					writer.write("&gt");
+					writer.write("&gt;");
 					break;
 				case '<' :
-					writer.write("&lt");
+					writer.write("&lt;");
 					break;
 				case '"' :
 				case '\'' :
 					if (c == quot) {
-						writer.write(c == '"' ? "&quot" : "&apos");
+						writer.write(c == '"' ? "&quot;" : "&apos;");
 						break;
 					}
 				default :
@@ -101,16 +105,25 @@ public class KXmlSerializer implements XmlSerializer {
 	}
 
 	public boolean getFeature(String name) {
-		return false;
+		return(FEATURE_INDENT_OUTPUT.equals (name)) 
+			? indent [depth] : false;
 	}
 
-	private final String getPrefix (String namespace) {
+	private final String getPrefix (String namespace, boolean create) {
 		for (int i = nspCounts [depth] * 2 - 2; i >= 0; i -= 2) {
 			if (nspStack[i+1].equals(namespace)) return nspStack[i];
 		}
 
-		depth--;
-		String prefix = "n"+(auto++);
+		if (!create) return UNDEFINED;
+		
+		depth--;	
+		String prefix;
+		
+		do {
+		  prefix = "n"+(auto++);
+		}
+		while (getPrefix (prefix, false) != null);
+		
 		setPrefix (prefix, namespace);
 		depth++;
 		return prefix;
@@ -121,12 +134,15 @@ public class KXmlSerializer implements XmlSerializer {
 	}
 
 	public void ignorableWhitespace(String s) throws IOException {
-		check ();
-		writer.write (s);
+		text (s);
 	}
 
 	public void setFeature(String name, boolean value) {
-		throw new RuntimeException("Unsupported Feature");
+		if (FEATURE_INDENT_OUTPUT.equals (name)) {
+			indent [depth] = value;			
+		}
+		else 
+			throw new RuntimeException("Unsupported Feature");
 	}
 
 	public void setProperty(String name, Object value) {
@@ -135,7 +151,14 @@ public class KXmlSerializer implements XmlSerializer {
 
 
 	public void setPrefix(String prefix, String namespace) {
-	
+
+		String defined = getPrefix (namespace, false);
+		
+		// boil out if already defined
+		
+		if (defined == prefix 
+			|| (prefix != null && prefix.equals (defined))) return;
+			
 		int pos = (nspCounts [depth+1]++) << 1;
 		
 		if (nspStack.length < pos+1) {
@@ -168,8 +191,12 @@ public class KXmlSerializer implements XmlSerializer {
 
 	public void startTag(String namespace, String name) throws IOException {
 		check();
-		//	if (indent) writeIndent ();
-
+		if (indent[depth]) {
+			writer.write ("\r\n");
+			for (int i = 0; i < depth; i++) 
+				writer.write (' ');
+		}
+		
 		int esp = depth*3;
 
 		if (elementStack.length < esp+3) {
@@ -179,8 +206,14 @@ public class KXmlSerializer implements XmlSerializer {
 		}
 
 		depth++;
+
+		if (indent.length <= depth) {
+			boolean [] hlp = new boolean [depth+4];
+			System.arraycopy (indent, 0, hlp, 0, depth);
+		}
+		indent [depth] = indent [depth-1];
 					
-		String prefix = getPrefix(namespace);
+		String prefix = getPrefix(namespace, true);
 
 		elementStack[esp++] = namespace;
 		elementStack[esp++] = prefix;
@@ -216,7 +249,7 @@ public class KXmlSerializer implements XmlSerializer {
 
 		int cnt = nspCounts [depth];
 
-		String prefix = getPrefix(namespace);
+		String prefix = getPrefix(namespace, true);
 		
 		if (cnt != nspCounts [depth]) {
 			writer.write (' ');
@@ -254,6 +287,7 @@ public class KXmlSerializer implements XmlSerializer {
 	}
 */
 	public void endTag(String namespace, String name) throws IOException {
+
 		depth--;
 
 		if (!elementStack [depth * 3].equals (namespace) 
@@ -265,6 +299,12 @@ public class KXmlSerializer implements XmlSerializer {
 			pending = false;
 		}
 		else {
+			if (indent[depth+1]) {
+				writer.write ("\r\n");
+				for (int i = 0; i < depth; i++) 
+					writer.write (' ');
+			}
+			
 			writer.write ("</");
 			String prefix = elementStack [depth*3+1];
 			if (prefix != null) {
@@ -280,6 +320,7 @@ public class KXmlSerializer implements XmlSerializer {
 
 	public void text(String text) throws IOException {
 		check();
+		indent [depth] = false;		
 		writeEscaped(text, -1);
 	}
 
