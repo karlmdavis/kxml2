@@ -5,8 +5,6 @@ import java.io.*;
 
 import org.kxml2.io.*;
 import org.xmlpull.v1.*;
-import org.xmlpull.v1.serializer.*;
-
 public class Roundtrip {
 	//private static final String FEATURE_XML_ROUNDTRIP=
 	//    "http://xmlpull.org/v1/doc/features.html#xml-roundtrip";

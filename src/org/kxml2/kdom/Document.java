@@ -4,8 +4,6 @@ import java.util.*;
 import java.io.*;
 
 import org.xmlpull.v1.*;
-import org.xmlpull.v1.serializer.*;
-
 /** The document consists of some legacy events and a single root
     element. This class basically adds some consistency checks to
     Node. */

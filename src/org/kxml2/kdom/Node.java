@@ -23,8 +23,6 @@ package org.kxml2.kdom;
 import java.util.*;
 import java.io.*;
 import org.xmlpull.v1.*;
-import org.xmlpull.v1.serializer.*;
-
 /** A common base class for Document and Element, also used for
     storing XML fragments. */
 

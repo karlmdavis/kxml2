@@ -1,8 +1,6 @@
 import java.io.*;
 
 import org.xmlpull.v1.*;
-import org.xmlpull.v1.serializer.*;
-
 import org.kxml2.kdom.*;
 import org.kxml2.io.*;
 

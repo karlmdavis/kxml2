@@ -18,7 +18,7 @@
 package org.kxml2.io;
 
 import java.io.*;
-import org.xmlpull.v1.serializer.*;
+import org.xmlpull.v1.*;
 
 public class KXmlSerializer implements XmlSerializer {
 
@@ -107,6 +107,11 @@ public class KXmlSerializer implements XmlSerializer {
     public boolean getFeature(String name) {
         return (FEATURE_INDENT_OUTPUT.equals(name)) ? indent[depth] : false;
     }
+
+
+	public String getPrefix (String namespace, boolean create) {
+		return getPrefix (namespace, false, create);
+	}
 
     private final String getPrefix(
         String namespace,

@@ -24,8 +24,6 @@ import java.io.*;
 import java.util.*;
 
 import org.xmlpull.v1.*;
-import org.xmlpull.v1.serializer.*;
-
 /** In order to create an element, please use the createElement method
     instead of invoking the constructor directly. The right place to
     add user defined initialization code is the init method. */
