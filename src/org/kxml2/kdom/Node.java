@@ -135,26 +135,30 @@ public class Node { //implements XmlIO{
                     + (i == -1
                         ? " not found in "
                         : " more than once in ")
-                    + getName());
+                    + this);
 
         return getElement(i);
     }
 
-    /** returns "#document-fragment". For elements, the element name is returned */
+    /* returns "#document-fragment". For elements, the element name is returned 
 
     public String getName() {
         return "#document-fragment";
     }
 
     /** Returns the namespace of the current element. For Node
-        and Document, Xml.NO_NAMESPACE is returned. */
+        and Document, Xml.NO_NAMESPACE is returned. 
 
     public String getNamespace() {
         return "";
     }
 
+	public int getNamespaceCount () {
+		return 0;
+	}
+
     /** returns the text content if the element has text-only
-    content. Throws an exception for mixed content */
+    content. Throws an exception for mixed content
 
     public String getText() {
 
@@ -170,7 +174,8 @@ public class Node { //implements XmlIO{
 
         return buf.toString();
     }
-
+ */
+ 
     /** Returns the text node with the given index or null if the node
 	    with the given index is not a text node. */
 
@@ -186,11 +191,13 @@ public class Node { //implements XmlIO{
     }
 
     /** Convenience method for indexOf (getNamespace (), name,
-        startIndex). */
+        startIndex). 
 
     public int indexOf(String name, int startIndex) {
         return indexOf(getNamespace(), name, startIndex);
     }
+ */
+
 
     /** Performs search for an element with the given namespace and
     name, starting at the given start index. A null namespace

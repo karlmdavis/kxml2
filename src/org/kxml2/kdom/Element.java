@@ -1,17 +1,16 @@
-/* kXML
+/* kXML2
  *
- * The contents of this file are subject to the Enhydra Public License
- * Version 1.1 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License
- * on the Enhydra web site ( http://www.enhydra.org/ ).
- *
+ * The contents of this file are subject to the Lesser GNU Public License
+ * (LGPL, the "License"); you may not use this file except in
+ * compliance with the License. 
+ * 
  * Software distributed under the License is distributed on an "AS IS"
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
  * the License for the specific terms governing rights and limitations
  * under the License.
  *
  * The Initial Developer of kXML is Stefan Haustein. Copyright (C)
- * 2000, 2001 Stefan Haustein, D-46045 Oberhausen (Rhld.),
+ * 2000, 2001, 2002 Stefan Haustein, D-46045 Oberhausen (Rhld.),
  * Germany. All Rights Reserved.
  *
  * Contributor(s): Paul Palaszewski, Wilhelm Fitzpatrick, 
@@ -37,7 +36,7 @@ public class Element extends Node {
     protected String name;
     protected Vector attributes;
     protected Node parent;
-    protected Vector namespaces;
+    protected Vector prefixes;
 
     public Element() {
     }
@@ -50,11 +49,6 @@ public class Element extends Node {
     }
 
 
-	public void addAttribute (String namespace, String prefix, String name, String value) {
-		if (attributes == null) attributes = new Vector ();
-		attributes.addElement 
-			(new String [] {namespace, prefix, name, value});
-	}
 
 
     /** removes all children and attributes */
@@ -89,17 +83,17 @@ public class Element extends Node {
 		return ((String []) attributes.elementAt (index)) [0];
 	}
 
-	public String getAttributePrefix (int index) {
+/*	public String getAttributePrefix (int index) {
 		return ((String []) attributes.elementAt (index)) [1];
-	}
+	}*/
 	
 	public String getAttributeName (int index) {
-		return ((String []) attributes.elementAt (index)) [2];
+		return ((String []) attributes.elementAt (index)) [1];
 	}
 	
 
 	public String getAttributeValue (int index) {
-		return ((String []) attributes.elementAt (index)) [3];
+		return ((String []) attributes.elementAt (index)) [2];
 	}
 	
 	
@@ -140,11 +134,35 @@ public class Element extends Node {
     public String getNamespace() {
         return namespace;
     }
+
     
     public String getNamespace (String prefix) {
-    	throw new RuntimeException ("NYI");
+    	int cnt = getNamespaceCount ();
+		for (int i = 0; i < cnt; i++) {
+			if (prefix == getNamespacePrefix (i) ||
+				(prefix != null && prefix.equals (getNamespacePrefix (i))))
+				return getNamespaceUri (i);	
+		}
+		return parent instanceof Element ? ((Element) parent).getNamespace (prefix) : null;
     }
-    
+
+
+	/** returns the number of declared namespaces, NOT including
+	 * 	parent elements */
+
+	public int getNamespaceCount () {
+		return (prefixes == null ? 0 : prefixes.size ());
+	}
+
+
+	public String getNamespacePrefix (int i) {
+		return ((String []) prefixes.elementAt (i)) [0];
+	}
+
+	public String getNamespaceUri (int i) {
+		return ((String []) prefixes.elementAt (i)) [1];
+	}
+
 
     /** Returns the parent node of this element */
 
@@ -169,9 +187,16 @@ public class Element extends Node {
 
         name = parser.getName();
         namespace = parser.getNamespace();
+        
+        for (int i = parser.getNamespaceCount (parser.getDepth () - 1);
+        	i < parser.getNamespaceCount (parser.getDepth ()); i++) {
+        	setPrefix (parser.getNamespacePrefix (i), parser.getNamespaceUri(i));
+        }
+        
+        
         for (int i = 0; i < parser.getAttributeCount (); i++) 
-	        addAttribute (parser.getAttributeNamespace (i),
-	        			  parser.getAttributePrefix (i),
+	        setAttribute (parser.getAttributeNamespace (i),
+//	        			  parser.getAttributePrefix (i),
 	        			  parser.getAttributeName (i),
 	        			  parser.getAttributeValue (i));
 
@@ -199,11 +224,23 @@ public class Element extends Node {
         parser.nextToken ();
     }
 
-    /** Removes the attribute at the given index */
 
-    public void removeAttribute(int index) {
-        attributes.removeElementAt(index);
-    }
+    /** Sets the given attribute; a value of null removes the attribute */
+
+	public void setAttribute (String namespace, String name, String value) {
+		if (attributes == null) attributes = new Vector ();
+		attributes.addElement 
+			(new String [] {namespace, name, value});
+	}
+
+
+	/** Sets the given prefix; a namespace value of null removess the 
+	 * 	prefix */
+
+	public void setPrefix (String prefix, String namespace) {
+		if (prefixes == null) prefixes = new Vector ();
+		prefixes.addElement (new String [] {prefix, namespace});		
+	}
 
 
     /** sets the name of the element */
@@ -237,6 +274,12 @@ public class Element extends Node {
 
     public void write(XmlSerializer writer)
         throws IOException {
+
+		if (prefixes != null) {
+			for (int i = 0; i < prefixes.size (); i++) {
+				writer.setPrefix (getNamespacePrefix (i), getNamespaceUri (i));
+			}
+		}
 
         writer.startTag(
             getNamespace(),
