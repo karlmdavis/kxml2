@@ -18,7 +18,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE. */
 
-
 package org.kxml2.kdom;
 
 import java.util.*;
@@ -32,7 +31,7 @@ public class Node { //implements XmlIO{
     public static final int DOCUMENT = 0;
     public static final int ELEMENT = 2;
     public static final int TEXT = 4;
-	public static final int CDSECT = 5;
+    public static final int CDSECT = 5;
     public static final int ENTITY_REF = 6;
     public static final int IGNORABLE_WHITESPACE = 7;
     public static final int PROCESSING_INSTRUCTION = 8;
@@ -82,9 +81,7 @@ public class Node { //implements XmlIO{
     legal value. Currently, null is converted to Xml.NO_NAMESPACE,
     but future versions may throw an exception. */
 
-    public Element createElement(
-        String namespace,
-        String name) {
+    public Element createElement(String namespace, String name) {
 
         Element e = new Element();
         e.namespace = namespace == null ? "" : namespace;
@@ -111,11 +108,8 @@ public class Node { //implements XmlIO{
 
     public Element getElement(int index) {
         Object child = getChild(index);
-        return (child instanceof Element)
-            ? (Element) child
-            : null;
+        return (child instanceof Element) ? (Element) child : null;
     }
-
 
     /** Returns the element with the given namespace and name. If the
         element is not found, or more than one matching elements are
@@ -132,52 +126,50 @@ public class Node { //implements XmlIO{
                     + namespace
                     + "}"
                     + name
-                    + (i == -1
-                        ? " not found in "
-                        : " more than once in ")
+                    + (i == -1 ? " not found in " : " more than once in ")
                     + this);
 
         return getElement(i);
     }
 
     /* returns "#document-fragment". For elements, the element name is returned 
-
+    
     public String getName() {
         return "#document-fragment";
     }
-
+    
     /** Returns the namespace of the current element. For Node
         and Document, Xml.NO_NAMESPACE is returned. 
-
+    
     public String getNamespace() {
         return "";
     }
-
-	public int getNamespaceCount () {
-		return 0;
-	}
-
+    
+    public int getNamespaceCount () {
+    	return 0;
+    }
+    
     /** returns the text content if the element has text-only
     content. Throws an exception for mixed content
-
+    
     public String getText() {
-
+    
         StringBuffer buf = new StringBuffer();
         int len = getChildCount();
-
+    
         for (int i = 0; i < len; i++) {
             if (isText(i))
                 buf.append(getText(i));
             else if (getType(i) == ELEMENT)
                 throw new RuntimeException("not text-only content!");
         }
-
+    
         return buf.toString();
     }
- */
- 
+    */
+
     /** Returns the text node with the given index or null if the node
-	    with the given index is not a text node. */
+        with the given index is not a text node. */
 
     public String getText(int index) {
         return (isText(index)) ? (String) getChild(index) : null;
@@ -192,22 +184,18 @@ public class Node { //implements XmlIO{
 
     /** Convenience method for indexOf (getNamespace (), name,
         startIndex). 
-
+    
     public int indexOf(String name, int startIndex) {
         return indexOf(getNamespace(), name, startIndex);
     }
- */
-
+    */
 
     /** Performs search for an element with the given namespace and
     name, starting at the given start index. A null namespace
     matches any namespace, please use Xml.NO_NAMESPACE for no
     namespace).  returns -1 if no matching element was found. */
 
-    public int indexOf(
-        String namespace,
-        String name,
-        int startIndex) {
+    public int indexOf(String namespace, String name, int startIndex) {
 
         int len = getChildCount();
 
@@ -217,19 +205,16 @@ public class Node { //implements XmlIO{
 
             if (child != null
                 && name.equals(child.getName())
-                && (namespace == null
-                    || namespace.equals(child.getNamespace())))
+                && (namespace == null || namespace.equals(child.getNamespace())))
                 return i;
         }
         return -1;
     }
 
-	public boolean isText (int i) {
-		int t = getType (i);	
-		return t == TEXT || t == IGNORABLE_WHITESPACE 
-			|| t == CDSECT;
-	}
-
+    public boolean isText(int i) {
+        int t = getType(i);
+        return t == TEXT || t == IGNORABLE_WHITESPACE || t == CDSECT;
+    }
 
     /** Recursively builds the child elements from the given parser
     until an end tag or end document is found. 
@@ -241,7 +226,7 @@ public class Node { //implements XmlIO{
         boolean leave = false;
 
         do {
-        	int type = parser.getEventType ();
+            int type = parser.getEventType();
             switch (type) {
 
                 case XmlPullParser.START_TAG :
@@ -264,14 +249,17 @@ public class Node { //implements XmlIO{
                 case XmlPullParser.END_TAG :
                     leave = true;
                     break;
-	
-	
+
                 default :
-					if (parser.getText () == null) 
-					 	addChild(ENTITY_REF, parser.getName ());
-                    else 
-                        addChild(type == XmlPullParser.ENTITY_REF ? TEXT : type, 
-                    		parser.getText());
+                    if (parser.getText() != null)
+                        addChild(
+                            type == XmlPullParser.ENTITY_REF ? TEXT : type,
+                            parser.getText());
+                    else if (
+                        type == XmlPullParser.ENTITY_REF
+                            && parser.getName() != null) {
+                        addChild(ENTITY_REF, parser.getName());
+                    }
                     parser.nextToken();
             }
         }
@@ -313,22 +301,19 @@ public class Node { //implements XmlIO{
         }
     }
     */
-    
 
     /** Writes this node to the given XmlWriter. For node and document,
         this method is identical to writeChildren, except that the
         stream is flushed automatically. */
 
-    public void write(XmlSerializer writer)
-        throws IOException {
+    public void write(XmlSerializer writer) throws IOException {
         writeChildren(writer);
         writer.flush();
     }
 
     /** Writes the children of this node to the given XmlWriter. */
 
-    public void writeChildren(XmlSerializer writer)
-        throws IOException {
+    public void writeChildren(XmlSerializer writer) throws IOException {
         if (children == null)
             return;
 
@@ -350,28 +335,28 @@ public class Node { //implements XmlIO{
                     writer.ignorableWhitespace((String) child);
                     break;
 
-				case CDSECT:
-					writer.cdsect((String) child);
-					break;
+                case CDSECT :
+                    writer.cdsect((String) child);
+                    break;
 
-				case COMMENT:
-					writer.comment((String) child);
-					break;
+                case COMMENT :
+                    writer.comment((String) child);
+                    break;
 
-                case ENTITY_REF:
+                case ENTITY_REF :
                     writer.entityRef((String) child);
                     break;
 
-				case PROCESSING_INSTRUCTION:
-					writer.processingInstruction ((String) child);
-					break;					
+                case PROCESSING_INSTRUCTION :
+                    writer.processingInstruction((String) child);
+                    break;
 
-				case DOCDECL:
-					writer.docdecl((String) child);
-					break;
+                case DOCDECL :
+                    writer.docdecl((String) child);
+                    break;
 
                 default :
-					throw new RuntimeException ("Illegal type: "+ type);
+                    throw new RuntimeException("Illegal type: " + type);
             }
         }
     }
