@@ -266,7 +266,8 @@ public class Node { //implements XmlIO{
 	
                 default :
 					if (parser.getText () == null) 
-					 	throw new RuntimeException (parser.getPositionDescription());
+					 	throw new RuntimeException 
+					 		("Undefined entity at: "+parser.getPositionDescription());
 
                     addChild(type == XmlPullParser.ENTITY_REF ? TEXT : type, 
                     		parser.getText());
