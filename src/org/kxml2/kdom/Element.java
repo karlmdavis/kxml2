@@ -180,6 +180,8 @@ public class Element extends Node {
             parser.END_TAG,
             getNamespace(),
             getName());
+            
+        parser.nextToken ();
     }
 
     /** Removes the attribute at the given index */

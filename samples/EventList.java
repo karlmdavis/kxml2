@@ -8,12 +8,9 @@ public class EventList {
 	public static void main(String[] args)
 		throws IOException, XmlPullParserException {
 
-		System.out.println ("This sample is not yet ported from kXML 1");
-
-/*
 		for (int i = 0; i < 2; i++) {
 
-			XmlReader xr = new XmlReader();
+			XmlPullParser xr = new KXmlParser();
 			xr.setInput(new FileReader(args[0]));
 
 			System.out.println("");
@@ -30,9 +27,8 @@ public class EventList {
 				System.out.println(xr.getPositionDescription());
 
 
-			} while (xr.getType() != XmlPullParser.END_DOCUMENT);
+			} while (xr.getEventType() != XmlPullParser.END_DOCUMENT);
 		}
-*/
 	}
 
 }

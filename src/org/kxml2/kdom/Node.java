@@ -256,8 +256,11 @@ public class Node { //implements XmlIO{
                 case XmlPullParser.END_TAG :
                     leave = true;
                     break;
-
+	
                 default :
+					if (parser.getText () == null) 
+					 	throw new RuntimeException (parser.getPositionDescription());
+
                     addChild(parser.getEventType(), parser.getText());
                     parser.nextToken();
             }
@@ -330,13 +333,27 @@ public class Node { //implements XmlIO{
                     break;
 
                 case TEXT :
-                case IGNORABLE_WHITESPACE :
                     writer.text((String) child);
                     break;
 
+                case IGNORABLE_WHITESPACE :
+                    writer.ignorableWhitespace((String) child);
+                    break;
+
+				case CDSECT:
+					writer.cdsect((String) child);
+					break;
+
+				case COMMENT:
+					writer.comment((String) child);
+					break;
+
+				case PROCESSING_INSTRUCTION:
+					writer.processingInstruction ((String) child);
+					break;					
+
                 default :
-					throw new RuntimeException ("NYI");
-//                    writer.writeLegacy(type, (String) child);
+					throw new RuntimeException ("Illegal type: "+ type);
             }
         }
     }

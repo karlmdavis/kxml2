@@ -43,7 +43,11 @@ public class Document extends Node {
 
     public void parse(XmlPullParser parser)
         throws IOException, XmlPullParserException {
+
+		parser.require(parser.START_DOCUMENT, null, null);
+		parser.nextToken ();        	
         super.parse(parser);
+
         if (parser.getEventType() != parser.END_DOCUMENT)
             throw new RuntimeException("Document end expected!");
 

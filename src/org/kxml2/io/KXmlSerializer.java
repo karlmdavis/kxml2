@@ -22,180 +22,273 @@ import org.xmlpull.v1.serializer.*;
 
 public class KXmlSerializer implements XmlSerializer {
 
-    private Writer writer;
-    private boolean pending;
+	private Writer writer;
+	private boolean pending;
 
-    private int depth;
-    private String[] elementStack = new String [16];
-    private String[] nspStack = new String [8];
-    private int[] nspCounts = new int [4];
+	private int depth;
 
-    private final void check () throws IOException {
-	if (pending) writer.write (">");
-    }
+	private String[] elementStack = new String[12];  //nsp/prefix/name
+	private int[] nspCounts = new int[4];
+	private int auto;
+	private String[] nspStack = new String[8];  //prefix/nsp
 
-    private final void writeEscaped (String s, int quot) throws IOException {
-	StringBuffer buf = new StringBuffer ();
-	for (int i = 0; i < s.length (); i++) {
-	    char c = s.charAt (i);
-	    switch (c) {
-	    case '&': writer.write ("&amp"); break;
-	    case '>': writer.write ("&gt"); break;
-	    case '<': writer.write ("&lt"); break;
-	    case '"':
-	    case '\'':
-		if (c == quot) {
-		    writer.write (c == '"' ? "&quot" : "&apos");
-		    break;
+	private final void check() throws IOException {
+		if (!pending) return;
+		writer.write(">");
+		pending = false;
+		
+		if (nspCounts.length < depth+2) {
+			int [] hlp = new int [depth+5];
+			System.arraycopy(nspCounts, 0, hlp, 0, depth+1);
+			nspCounts = hlp;
 		}
-	    default: writer.write (c);
-	    }
+		
+		nspCounts [depth+1] = nspCounts[depth];
 	}
-    }
 
-    private final void writeIndent () throws IOException {
-	writer.write ("\r\n");
-	for (int i = 0; i < depth; i++) writer.write (' '); 
-    }
+	private final void writeEscaped(String s, int quot) throws IOException {
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			switch (c) {
+				case '&' :
+					writer.write("&amp");
+					break;
+				case '>' :
+					writer.write("&gt");
+					break;
+				case '<' :
+					writer.write("&lt");
+					break;
+				case '"' :
+				case '\'' :
+					if (c == quot) {
+						writer.write(c == '"' ? "&quot" : "&apos");
+						break;
+					}
+				default :
+					writer.write(c);
+			}
+		}
+	}
 
-    public void docdecl (String dd) {
-	throw new RuntimeException ("NYI");
-    }
+/*
+	private final void writeIndent() throws IOException {
+		writer.write("\r\n");
+		for (int i = 0; i < depth; i++)
+			writer.write(' ');
+	}*/
 
-    public void endDocument () throws IOException {
-	check ();
-    }
+	public KXmlSerializer () {
+		nspCounts [0] = 1;
+		nspCounts [1] = 1;
+		nspStack [1] = "";	
+	}
 
-    public void entityRef (String name) throws IOException {
-	check ();
-	writer.write ('&');
-	writer.write (name);
-	writer.write (';');
-    }
+	public void docdecl(String dd) {
+		throw new RuntimeException("NYI");
+	}
 
-    public boolean getFeature (String name) {
-	return false;
-    }
-    
-    public String getPrefix (String namespace, boolean create) {
-	if (namespace != null && !namespace.equals ("")) 
-	    throw new RuntimeException ("NYI");
-	return null;
-    }
+	public void endDocument() throws IOException {
+		check();
+	}
 
-    public Object getProperty (String name) {
-	throw new RuntimeException ("Unsupported property");
-    }
+	public void entityRef(String name) throws IOException {
+		check();
+		writer.write('&');
+		writer.write(name);
+		writer.write(';');
+	}
+
+	public boolean getFeature(String name) {
+		return false;
+	}
+
+	private final String getPrefix (String namespace) {
+		for (int i = nspCounts [depth] * 2 - 2; i >= 0; i -= 2) {
+			if (nspStack[i+1].equals(namespace)) return nspStack[i];
+		}
+
+		depth--;
+		String prefix = "n"+(auto++);
+		setPrefix (prefix, namespace);
+		depth++;
+		return prefix;
+	}
+
+	public Object getProperty(String name) {
+		throw new RuntimeException("Unsupported property");
+	}
+
+	public void ignorableWhitespace(String s) throws IOException {
+		check ();
+		writer.write (s);
+	}
+
+	public void setFeature(String name, boolean value) {
+		throw new RuntimeException("Unsupported Feature");
+	}
+
+	public void setProperty(String name, Object value) {
+		throw new RuntimeException("Unsupported Property:" + value);
+	}
+
+
+	public void setPrefix(String prefix, String namespace) {
 	
-    public void ignorableWhitespace (String s) {
-	throw new RuntimeException ("NYI");
-    }
-
-    public void setFeature (String name, boolean value) {
-	throw new RuntimeException ("Unsupported Feature");
-    }
-
-    public void setProperty (String name, Object value) {
-	throw new RuntimeException ("Unsupported Property:" +value);
-    }
-
-
-    public void setPrefix (String prefix, String namespace) {
-	throw new RuntimeException ("NYI");
-    }
-
-
-    public void setOutput (Writer writer) {
-	this.writer = writer;
-    }
-
-    public void setOutput (OutputStream os, String encoding) throws IOException {
-	this.writer = new OutputStreamWriter (os, encoding);
-    }
-
-    public void startDocument (String encoding, 
-			       Boolean standalone) throws IOException {
-	writer.write ("");
-    }
-
-    public void startTag (String namespace, String name) throws IOException {
-	check ();
-	//	if (indent) writeIndent ();
-	String prefix = getPrefix (namespace, true);
-
-	writer.write ('<');
-	if (prefix != null) {
-	    writer.write (prefix);
-	    writer.write (':');
+		int pos = (nspCounts [depth+1]++) << 1;
+		
+		if (nspStack.length < pos+1) {
+			String [] hlp = new String [nspStack.length + 16];
+			System.arraycopy(nspStack, 0, hlp, 0, pos);
+			nspStack = hlp;		
+		}
+		
+		nspStack [pos++] = prefix;
+		nspStack [pos] = namespace;
 	}
 
-	writer.write (name);
-	pending = true;
-	depth ++;
-    }
 
-
-    public void attribute (String namespace, String name, 
-			   String value) throws IOException {
-	if (!pending) throw new RuntimeException 
-	    ("illegal position for attribute");
-
-	String prefix = getPrefix (namespace, true);
-
-	writer.write (' ');
-	if (prefix != null) {
-	    writer.write (prefix);
-	    writer.write (':');
+	public void setOutput(Writer writer) {
+		this.writer = writer;
 	}
-	writer.write (name);
-	writer.write ('=');
-	char q = value.indexOf ('"') == -1 ? '"' : '\'';
-	writer.write (q);
-	writeEscaped (value, '"');
-	writer.write (q);
-    }
 
-
-    public void flush () throws IOException {
-	check ();
-	writer.flush ();
-    }
-
-    public void close () throws IOException {
-	check ();
-	writer.close ();
-    }
-
-    public void endTag (String namespace, String name) throws IOException {
-	if (pending) {
-	    depth--;
-	    writer.write (" />");
-	    pending = false;
+	public void setOutput(OutputStream os, String encoding)
+		throws IOException {
+		this.writer =
+			encoding == null
+				? new OutputStreamWriter(os)
+				: new OutputStreamWriter(os, encoding);
 	}
-	else {
-	    String prefix = getPrefix (namespace, false);
-	    depth--;
-	    writeIndent ();
+
+	public void startDocument(String encoding, Boolean standalone)
+		throws IOException {
+		writer.write("");
 	}
-    }
 
-    public void text (String text) throws IOException {
-	check ();
-	writeEscaped (text, -1);
-    }
+	public void startTag(String namespace, String name) throws IOException {
+		check();
+		//	if (indent) writeIndent ();
 
-    public void text (char [] text, int start, int len) {
-	throw new RuntimeException ("NYI");
-    }
+		int esp = depth*3;
 
-    public void cdsect (String data) {
-	throw new RuntimeException ("NYI");
-    }
+		if (elementStack.length < esp+3) {
+			String [] hlp = new String [elementStack.length + 12];
+			System.arraycopy(elementStack, 0, hlp, 0, esp);
+			elementStack = hlp;
+		}
 
-    public void comment (String comment) throws IOException {
-    }
+		depth++;
+					
+		String prefix = getPrefix(namespace);
 
-    public void processingInstruction (String pi) {
-	throw new RuntimeException ("NYI");
-    }
+		elementStack[esp++] = namespace;
+		elementStack[esp++] = prefix;
+		elementStack[esp] = name;
+
+		writer.write('<');
+		if (prefix != null) {
+			writer.write(prefix);
+			writer.write(':');
+		}
+
+		writer.write(name);
+
+		for (int i=nspCounts[depth-1]; i < nspCounts[depth]; i++) {
+			writer.write (' ');
+			writer.write ("xmlns");
+			if (nspStack [i*2] != null) {
+				writer.write (':');
+				writer.write(nspStack[i*2]);
+			}
+			writer.write ("=\'");
+			writer.write (nspStack[i*2+1]);
+			writer.write ('"');
+		}
+
+		pending = true;
+	}
+
+	public void attribute(String namespace, String name, String value)
+		throws IOException {
+		if (!pending)
+			throw new RuntimeException("illegal position for attribute");
+
+		String prefix = getPrefix(namespace);
+
+		writer.write(' ');
+		if (prefix != null) {
+			writer.write(prefix);
+			writer.write(':');
+		}
+		writer.write(name);
+		writer.write('=');
+		char q = value.indexOf('"') == -1 ? '"' : '\'';
+		writer.write(q);
+		writeEscaped(value, '"');
+		writer.write(q);
+	}
+
+	public void flush() throws IOException {
+		check();
+		writer.flush();
+	}
+/*
+	public void close() throws IOException {
+		check();
+		writer.close();
+	}
+*/
+	public void endTag(String namespace, String name) throws IOException {
+		depth--;
+
+		if (!elementStack [depth * 3].equals (namespace) 
+			|| !elementStack [depth * 3+2].equals (name)) 
+				throw new RuntimeException ("start/end tag mismatch");
+		
+		if (pending) {
+			writer.write(" />");
+			pending = false;
+		}
+		else {
+			writer.write ("</");
+			String prefix = elementStack [depth*3+1];
+			if (prefix != null) {
+				writer.write (prefix);
+				writer.write (':');
+			}
+			writer.write (name);
+			writer.write ('>');
+		}
+	}
+
+	public void text(String text) throws IOException {
+		check();
+		writeEscaped(text, -1);
+	}
+
+	public void text(char[] text, int start, int len) {
+		throw new RuntimeException("NYI");
+	}
+
+	public void cdsect(String data) throws IOException {
+		check ();
+		writer.write ("<![CDSECT");
+		writer.write (data);
+		writer.write ("]>");		
+	}
+
+	public void comment(String comment) throws IOException {
+		check ();
+		writer.write ("<!--");
+		writer.write (comment);
+		writer.write ("-->");
+	}
+
+	public void processingInstruction(String pi) throws IOException {
+		check ();
+		writer.write ("<?");
+		writer.write (pi);
+		writer.write ('>');
+	}
 }
