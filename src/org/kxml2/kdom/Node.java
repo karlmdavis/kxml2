@@ -365,6 +365,10 @@ public class Node { //implements XmlIO{
 					writer.processingInstruction ((String) child);
 					break;					
 
+				case DOCDECL:
+					writer.docdecl((String) child);
+					break;
+
                 default :
 					throw new RuntimeException ("Illegal type: "+ type);
             }
