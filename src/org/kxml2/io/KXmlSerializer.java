@@ -140,12 +140,12 @@ public class KXmlSerializer implements XmlSerializer {
         boolean create)
         throws IOException {
 
-        for (int i = nspCounts[depth] * 2 - 2; i >= 0; i -= 2) {
+        for (int i = nspCounts[depth+1] * 2 - 2; i >= 0; i -= 2) {
             if (nspStack[i + 1].equals(namespace)
-                && (includeDefault || nspStack[i] != null)) {
+                && (includeDefault || !nspStack[i].equals(""))) {
                 String cand = nspStack[i];
                 for (int j = i + 2;
-                    j < nspCounts[depth] * 2;
+                    j < nspCounts[depth+1] * 2;
                     j++) {
                     if (nspStack[j].equals(cand)) {
                         cand = null;
@@ -167,7 +167,7 @@ public class KXmlSerializer implements XmlSerializer {
         else {
             do {
                 prefix = "n" + (auto++);
-                for (int i = nspCounts[depth] * 2 - 2;
+                for (int i = nspCounts[depth+1] * 2 - 2;
                     i >= 0;
                     i -= 2) {
                     if (prefix.equals(nspStack[i])) {
@@ -178,9 +178,7 @@ public class KXmlSerializer implements XmlSerializer {
             }
             while (prefix == null);
         }
-        depth--;
         setPrefix(prefix, namespace);
-        depth++;
         return prefix;
     }
 
@@ -216,9 +214,7 @@ public class KXmlSerializer implements XmlSerializer {
         if (namespace == null)
             namespace = "";
 
-		depth++;
         String defined = getPrefix(namespace, true, false);
-		depth--;
 
         // boil out if already defined
 
@@ -320,6 +316,8 @@ public class KXmlSerializer implements XmlSerializer {
             elementStack = hlp;
         }
 
+        String prefix = getPrefix(namespace, true, true);
+
         depth++;
 
         if (indent.length <= depth) {
@@ -329,7 +327,6 @@ public class KXmlSerializer implements XmlSerializer {
         }
         indent[depth] = indent[depth - 1];
 
-        String prefix = getPrefix(namespace, true, true);
 
         elementStack[esp++] = namespace;
         elementStack[esp++] = prefix;
@@ -352,6 +349,8 @@ public class KXmlSerializer implements XmlSerializer {
                 writer.write(':');
                 writer.write(nspStack[i * 2]);
             }
+			else if (namespace.equals("")) 
+				throw new IllegalStateException ("Cannot set default namespace for elements in no namespace");
             writer.write("=\"");
             writeEscaped(nspStack[i * 2 + 1], '"');
             writer.write('"');
@@ -371,13 +370,20 @@ public class KXmlSerializer implements XmlSerializer {
             throw new IllegalStateException("illegal position for attribute");
 
         int cnt = nspCounts[depth];
+        
         if (namespace == null)
             namespace = "";
+
+		depth--;
+		pending = false;
 
         String prefix =
             "".equals(namespace)
                 ? ""
                 : getPrefix(namespace, false, true);
+
+		pending = true;
+		depth++;
 
         if (cnt != nspCounts[depth]) {
             writer.write(' ');
@@ -400,7 +406,7 @@ public class KXmlSerializer implements XmlSerializer {
         writer.write('=');
         char q = value.indexOf('"') == -1 ? '"' : '\'';
         writer.write(q);
-        writeEscaped(value, '"');
+        writeEscaped(value, q);
         writer.write(q);
 
         return this;
@@ -451,6 +457,19 @@ public class KXmlSerializer implements XmlSerializer {
         nspCounts[depth + 1] = nspCounts[depth];
         return this;
     }
+
+	public String getNamespace() {
+		return elementStack [depth*3-3];	
+	}
+	
+	public String getName() {
+		return elementStack [depth*3-1];	
+	}
+	
+	public int getDepth() {
+		return depth;
+	}
+
 
     public XmlSerializer text(String text) throws IOException {
         check();
