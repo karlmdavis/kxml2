@@ -108,13 +108,18 @@ public class KXmlSerializer implements XmlSerializer {
 
 
 	public String getPrefix (String namespace, boolean create) {
-		return getPrefix (namespace, false, create);
+        try {
+		  return getPrefix (namespace, false, create);
+        }
+        catch (IOException e) {
+            throw new RuntimeException (e.toString());
+        }
 	}
 
     private final String getPrefix(
         String namespace,
         boolean includeDefault,
-        boolean create) {
+        boolean create) throws IOException {
 
         for (int i = nspCounts[depth] * 2 - 2; i >= 0; i -= 2) {
             if (nspStack[i + 1].equals(namespace) && 
@@ -164,9 +169,13 @@ public class KXmlSerializer implements XmlSerializer {
         throw new RuntimeException("Unsupported Property:" + value);
     }
 
-    public void setPrefix(String namespace, String prefix) {
+    public void setPrefix(String prefix, String namespace) throws IOException{
+
+        check();
 
         String defined = getPrefix(namespace, true, false);
+
+        if (prefix.equals ("")) prefix = null;
 
         // boil out if already defined
 
@@ -194,10 +203,12 @@ public class KXmlSerializer implements XmlSerializer {
         //indent = new boolean[4];
     
 
-        nspCounts[0] = 1;
-        nspCounts[1] = 1;
+        nspCounts[0] = 2;
+        nspCounts[1] = 2;
         nspStack[1] = "";
         nspStack[0] = null;
+        nspStack[2] = "xml";
+        nspStack[3] = "http://www.w3.org/XML/1998/namespace";
         pending = false;
         auto = 0;
         depth = 0;

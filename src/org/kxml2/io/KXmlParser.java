@@ -470,15 +470,17 @@ public class KXmlParser implements XmlPullParser {
     */
 
     private final void push(int c) {
-        if (c == '\r' || c == '\n') {
-
-            if (c == '\n' && wasCR) {
+        if (c == '\r')  {
+            wasCR = true;
+            c = type == START_TAG ? ' ' : '\n';
+        }
+        else if (c == '\n') {
+            if (wasCR) {
                 wasCR = false;
                 return;
             }
-
-            wasCR = c == '\r';
-            c = type == START_TAG ? ' ' : '\n';
+            
+            if (type == START_TAG) c = ' ';
         }
         else
             wasCR = false;
