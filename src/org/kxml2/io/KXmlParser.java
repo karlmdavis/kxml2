@@ -651,12 +651,18 @@ public class KXmlParser implements XmlPullParser {
             int c = read();
             if (c == ';')
                 break;
-            if (relaxed && (c == '<' || c == '&' || c <= ' ')) {
-                if (c != -1) push(c);                
-                return;
-            }
-            if (c == -1)
-                exception(UNEXPECTED_EOF);
+            if (c < 128 
+                && (c < '0' || c > '9')
+                && (c < 'a' || c > 'z')
+                && (c < 'A' || c > 'Z')
+                && c != '_' && c != '-' && c != '#') {
+                    if(!relaxed){
+                        exception("unterminated entity ref"); //; ends with:"+(char)c);            
+                    }
+                    if (c != -1) push(c);                
+                    return;
+                }
+
             push(c);
         }
 
