@@ -745,6 +745,8 @@ public class KXmlParser implements XmlPullParser {
 		if (is == null) throw new IllegalArgumentException ();
 		// add heuristics here!
 
+		if (is == null) throw new IllegalArgumentException ();
+
 		try {
 			setInput(enc == null 
 				? new InputStreamReader (is) 
