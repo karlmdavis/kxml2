@@ -4,7 +4,7 @@ package org.kxml2.wap;
 /** contains the WBXML constants  */
 
 
-public class Wbxml {
+public interface Wbxml {
 
     static public final int SWITCH_PAGE = 0;
     static public final int END = 1;
