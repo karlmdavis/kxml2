@@ -76,7 +76,7 @@
       <ftp server="upload.sourceforge.net"
          userid="anonymous"
          remotedir="/incoming"
-         password="sh@kobjects.org">
+         password="sf-deploy@kobjects.org">
          <fileset dir="dist"/>
       </ftp>
     </target>
