@@ -102,6 +102,16 @@ public class Element extends Node {
 		return ((String []) attributes.elementAt (index)) [3];
 	}
 	
+	
+	public String getAttributeValue (String namespace, String name) {
+		for (int i = 0; i < getAttributeCount (); i++) {
+			if (name.equals (getAttributeName (i)) 
+				&& (namespace == null || namespace.equals (getAttributeNamespace(i)))) {
+				return getAttributeValue (i);
+			}
+		}						
+		return null;			
+	}
 
     /** Returns the document this element is a member of. The document
     is determined by ascending to the parent of the root element.
@@ -130,6 +140,11 @@ public class Element extends Node {
     public String getNamespace() {
         return namespace;
     }
+    
+    public String getNamespace (String prefix) {
+    	throw new RuntimeException ("NYI");
+    }
+    
 
     /** Returns the parent node of this element */
 
