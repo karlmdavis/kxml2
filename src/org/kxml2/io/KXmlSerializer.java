@@ -459,11 +459,11 @@ public class KXmlSerializer implements XmlSerializer {
     }
 
 	public String getNamespace() {
-		return elementStack [depth*3-3];	
+		return depth == 0 ? null : elementStack [depth*3-3];	
 	}
 	
 	public String getName() {
-		return elementStack [depth*3-1];	
+		return depth == 0 ? null : elementStack [depth*3-1];	
 	}
 	
 	public int getDepth() {
