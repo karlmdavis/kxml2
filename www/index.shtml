@@ -1,0 +1,11 @@
+<html>
+<head><title>kXML</title></head>
+<body bgcolor="#ffffff">
+<!--include virtual="prolog.shtml" -->
+
+We are currently in the process of moving the kXML pages to sourceforge (=here). 
+In the meantime, please refer to <a href="http://kxml.org">kxml.org</a>.
+
+<!--include virtual="epilog.shtml" -->
+</body>
+</html>

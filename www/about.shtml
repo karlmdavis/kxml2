@@ -1,0 +1,70 @@
+<html>
+<head><title>About kXML</title></head>
+<body bgcolor="#ffffff">
+<!--#include virtual="prolog.shtml" -->
+
+
+
+<h1>About kXML</h1>
+       
+<p>kXML is a small XML pull parser, specially designed for constrained environments such as Applets, Personal Java or MIDP devices. In contrast to kXML 1, kXML 2 is based on the <a href="http://xmlpull.org">common 
+XML pull API</a>.  </p>
+
+<h2>kXML History and Versions</h2>
+
+ <table border="1" >
+  <tr>
+   <td>XP</td>
+   <td valign="top">XP was the predecessor of kXML, a simple wrapper that turned a given SAX parser into a pull parser.
+       It was originally implemented to simplify message (de)serialization in the Infolayer project,
+       which is quite cumbersome with push parsers (SAX). The initial public release was 1999-12-25.</td>
+  </tr>
+  <tr>
+   <td valign="top">kXML1</td>
+   <td>To be able to use the pull parser on embedded devices, it was necessary to get
+       rid of the SAX dependency. kXML1 is a simple pull parser based on event objects. 
+       kXML1 is now deprecated, please use kXML2 instead. kXML1 is archieved at 
+       <a href="http://kxml.objectweb.org">kxml.objectweb.org</a>.</td>
+  </tr>
+  <tr>
+   <td valign="top"><a href="kxml2">kXML2</a></td>
+   <td>The current version of kXML. In contrast to kXML1, it features cursor
+       API instead of event objects, leading to a reduced footprint and less object
+       creation overhead.</td>
+  </tr>
+  <tr>
+   <td><a href="kxml3">kXML3</a></td>
+   <td>kXML 3 will split the parser and API support available in versions for both, XmlPull and StAX</td>
+  </tr>
+ </table> 
+ 
+</center>
+
+
+<h2>Special Features</h2>
+
+<p>kXML has two "special" features that are intended to simplify developers' life in constrained environments:</p>
+
+<ul>
+<li>Support for <em>WBXML</em> (WAP binary encoded XML): Allows to parse WAP or Wireless Village content</li>
+<li>A robust <em>"relaxed" mode</em> for parsing HTML or SGML files (that are not well-formed XML documents) in order to avoid 
+ the need of two separate parsers in mobile phones.</li>
+</ul>
+
+
+<h2>XML Conformance</h2>
+
+<p>In order to keep kXML as small as possible, no efforts are made to recognize certain well-formedness errors that would require additional detection code, such as</p>
+
+<ul>
+<li>']]&gt;' contained in text content,</li>
+<li>duplicate attributes, and</li>
+<li>&lt;? folowed by a space before the target.</li>
+</ul>
+
+<p>Thus, kXML will accept some XML documents that should actually be rejected. Of course, an XML parser should detect all syntax errors to discourage the creation of bogous documents that work with one parser and do not work with another. Thus, if you are not limited by memory constraints, please use  <a href="http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/">MXP</a>, which is also faster than kXML.</p>
+
+<!--#include virtual="epilog.shtml" -->
+
+</body>
+</html>
