@@ -1197,7 +1197,7 @@ public class KXmlParser implements XmlPullParser {
                 minType = type;
             //	    if (curr <= TEXT) type = curr; 
         }
-        while (minType > CDSECT // ignorable
+        while (minType > ENTITY_REF // ignorable
             || (minType >= TEXT && peekType() >= TEXT));
 
         type = minType;
