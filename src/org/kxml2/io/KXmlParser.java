@@ -32,6 +32,7 @@ import org.xmlpull.v1.*;
 public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
     static final private String UNEXPECTED_EOF = "Unexpected EOF"; 
+    static final private String ILLEGAL_TYPE = "Wrong event type";
     static final private int LEGACY = 999;
 
     // general
@@ -44,7 +45,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     private String [] elementStack = new String [16];
     private String [] nspStack = new String [8];
     private int [] nspCounts = new int [4]; 
-    private boolean normalize;
+    private int normalize;
 
     // source
 
@@ -82,6 +83,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     private int peekCount;
     private boolean wasCR;
 
+    private Hashtable attrs; 
 
     public KXmlParser () {
 	this (Runtime.getRuntime ().freeMemory () >= 1048576 ? 8192 : 128);
@@ -93,7 +95,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     }
 
 
-    private final void adjustNsp () throws XmlPullParserException {
+    private final boolean adjustNsp () throws XmlPullParserException {
 
 	boolean any = false; 
 
@@ -116,7 +118,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
  	    else continue;
 
  	    if (!prefix.equals ("xmlns")) {
-	 	if (!prefix.equals ("xml")) any = true;
+	 	 any = true;
  	    } 
 	    else {
 		int j = (nspCounts [depth]++) << 1;
@@ -124,6 +126,9 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 		nspStack = ensureCapacity (nspStack, j+2);
 		nspStack [j] = attrName;
 		nspStack [j+1] = attributes [i+3];
+		
+		if (attrName != null && attributes [i+3].equals ("")) 
+		    exception ("illegal empty namespace");
 
 		//  prefixMap = new PrefixMap (prefixMap, attrName, attr.getValue ());
 	    
@@ -133,6 +138,8 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 		    System.arraycopy 
 			(attributes, i+4, attributes, i, 
 			 ((--attributeCount) << 2) -i); 
+		else
+		    any = true;
 	    }
 	}
 
@@ -149,19 +156,18 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 		
 		else if (cut != -1) {		     
 		    String attrPrefix = attrName.substring (0, cut); 
-		    if (!attrPrefix.equals ("xml")) { 
-			attrName = attrName.substring (cut+1); 
+
+		    attrName = attrName.substring (cut+1); 
 			
-			String attrNs = getNamespace (attrPrefix);
+		    String attrNs = getNamespace (attrPrefix);
 			
-			if (attrNs == null)  
-			    throw new RuntimeException  
-				("Undefined Prefix: "+attrPrefix + " in " + this); 
-			
-			attributes [i] = attrNs;
-			attributes [i+1] = attrPrefix;
-			attributes [i+2] = attrName;
-		    }
+		    if (attrNs == null)  
+			throw new RuntimeException  
+			    ("Undefined Prefix: "+attrPrefix + " in " + this); 
+		    
+		    attributes [i] = attrNs;
+		    attributes [i+1] = attrPrefix;
+		    attributes [i+2] = attrName;
 		} 
 	    } 
 	} 
@@ -182,6 +188,8 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 		exception ("undefined prefix: "+prefix);
 	    this.namespace = NO_NAMESPACE;
 	}
+
+	return any;
     } 
  
 
@@ -194,8 +202,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
 
     private final void exception (String desc) throws XmlPullParserException {
-	throw new XmlPullParserException 
-	    (desc + " pos: " +getPositionDescription ());
+	throw new XmlPullParserException (desc, this, null);
     }
 
 
@@ -203,8 +210,10 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	except from txtPos and whitespace. Does not set the type variable */
 
     private final int nextImpl (boolean token) throws IOException, XmlPullParserException {
+
+	if (reader == null) exception ("No Input specified");
 	
-	normalize = !token;
+	normalize = token ? 0 : 1;
 	attributeCount = 0;
 
 	if (degenerated) {
@@ -215,7 +224,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	
 	prefix = null;
 	name = null;
-	namespace = "";
+	namespace = null;
 	text = null;
 
 	int type = peekType ();
@@ -327,7 +336,8 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	throws IOException, XmlPullParserException {
 	
 	int nesting = 1;
-	
+	boolean quoted = false;
+
 	while (true) {
 	    int i = read ();
 	    switch (i) {
@@ -335,13 +345,17 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    case -1:
 	        exception (UNEXPECTED_EOF);
 		
+	    case '\'': quoted = !quoted; break;
+
 	    case '<': 
-		nesting++;
+		if (!quoted) nesting++;
 		break;
 		
 	    case '>':
-		if ((--nesting) == 0) 
-		    return;
+		if (!quoted) {
+		    if ((--nesting) == 0) 
+			return;
+		}
 		break;
 	    }
 	    if (push) push (i);
@@ -426,7 +440,8 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	
 	read (); // <
 	name = readName ();
-
+	normalize = 2;
+	
 	while (true) { 
 	    skip ();
 	    
@@ -499,9 +514,30 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
 	nspCounts [depth] = nspCounts [depth-1];
 
-	if (processNsp)
+	for (int i = attributeCount-1; i > 0; i--) {
+	    for (int j = 0; j < i; j++) {
+		if (getAttributeName (i).equals (getAttributeName (j)))
+		    exception
+			("Duplicate Attribute: "+getAttributeName (i));
+	    }
+	}
+
+	if (processNsp) {
 	    adjustNsp ();
-	
+
+	    for (int i = attributeCount-1; i > 0; i--) {
+		for (int j = 0; j < i; j++) {
+		    if (getAttributeName (i).equals (getAttributeName (j)) &&
+			getAttributeNamespace (i).equals (getAttributeNamespace (j)))
+			exception
+			    ("Duplicate Attribute: "+getAttributeName (i));
+		}
+	    }
+	}
+	else 
+	    namespace = "";
+
+
 	elementStack [sp] = namespace;
 	elementStack [sp+1] = prefix;
 	elementStack [sp+2] = name;
@@ -635,12 +671,12 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
 	    if (wasCR && nw == '\n') 
 		wasCR = false;
-	    else if (nw == '\r' && normalize) {
+	    else if (nw == '\r' && normalize > 0) {
 		wasCR = true;
-		peek [peekCount++] = '\n';
+		peek [peekCount++] = normalize > 1 ? ' ' : '\n';
 	    }
 	    else {
-		peek [peekCount++] = nw;
+		peek [peekCount++] = (nw == '\n' && normalize > 1) ? ' ' : nw;
 		wasCR = false;
 	    }
 	}
@@ -694,7 +730,14 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     
     public void setInput (Reader reader)  throws XmlPullParserException{
 	this.reader = reader;
-	
+
+	line = 1;
+	column = 0;
+	type = START_DOCUMENT;
+	name = null;
+	namespace = null;
+	degenerated = false;
+
 	if (reader == null) return;
 
 	srcPos = 0;
@@ -708,9 +751,6 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	entityMap.put ("gt", ">");
 	entityMap.put ("lt", "<");
 	entityMap.put ("quot", "\"");
-
-	line = 1;
-	column = 1;
     }
 
     
@@ -753,6 +793,10 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     
     
     public String getNamespace (String prefix) throws XmlPullParserException {
+
+	if ("xml".equals (prefix)) return "http://www.w3.org/XML/1998/namespace";
+	if ("xmlns".equals (prefix)) return "http://www.w3.org/2000/xmlns/";
+
 	for (int i = (getNamespaceCount (getDepth ()) << 1) - 2; i >= 0; i -= 2) {
 	    if (prefix == null) {
 		if (nspStack [i] == null) return nspStack [i+1];
@@ -823,15 +867,22 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     
     
     public boolean isWhitespace() throws XmlPullParserException {
+	if (type != TEXT && type != IGNORABLE_WHITESPACE) 
+	     exception (ILLEGAL_TYPE);
 	return isWhitespace;
     }
     
     
     public String getText () {
-	return get (0);
+	return type < TEXT ? null : get (0);
     }
     
     public char[] getTextCharacters (int [] poslen) {
+	if (type < TEXT) {
+	    poslen [0] = -1;
+	    poslen [1] = -1;
+	    return null;
+	}
 	poslen [0] = 0;
 	poslen [1] = txtPos;
 	return txtBuf;
@@ -854,13 +905,14 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     }
 
     
-    public boolean isEmptyElementTag() {
+    public boolean isEmptyElementTag() throws XmlPullParserException {
+	if (type != START_TAG) exception (ILLEGAL_TYPE);
 	return degenerated;
     }
     
 
     public int getAttributeCount() {
-	return attributeCount;
+	return type == START_TAG ? attributeCount : -1;
     }
     
 
@@ -884,7 +936,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     
     public String getAttributeValue(int index) {
 	if (index >= attributeCount) throw new IndexOutOfBoundsException ();
-	return attributes [(index << 2) + 2];
+	return attributes [(index << 2) + 3];
     }
 
     
@@ -893,7 +945,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
 	for (int i = (attributeCount << 2)-4; i >= 0; i -= 4) {
 	    if (attributes [i+2].equals (name) 
-		&& attributes [i].equals (namespace))
+		&& (namespace == null || attributes [i].equals (namespace)))
 		return attributes [i+3];
 	}
 	
@@ -1002,7 +1054,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    processNsp = value;
 	else if (XmlPullParser.FEATURE_REPORT_NAMESPACE_ATTRIBUTES.equals 
 		 (feature)) reportNspAttr = value;
-	else throw new XmlPullParserException 
+	else exception
 	    ("unsupported feature: "+feature);
     }
 
