@@ -24,9 +24,11 @@ import java.io.*;
 import java.util.*;
 
 import org.xmlpull.v1.*;
-/** In order to create an element, please use the createElement method
-    instead of invoking the constructor directly. The right place to
-    add user defined initialization code is the init method. */
+
+/** 
+ * In order to create an element, please use the createElement method
+ * instead of invoking the constructor directly. The right place to
+ * add user defined initialization code is the init method. */
 
 public class Element extends Node {
 
@@ -39,9 +41,10 @@ public class Element extends Node {
     public Element() {
     }
 
-    /** called when all properties are set, but before children
-        are parsed. Please do not use setParent for initialization
-        code any longer. */
+    /** 
+     * called when all properties are set, but before children
+     * are parsed. Please do not use setParent for initialization
+     * code any longer. */
 
     public void init() {
     }
@@ -49,18 +52,20 @@ public class Element extends Node {
 
 
 
-    /** removes all children and attributes */
+    /** 
+     * removes all children and attributes */
 
     public void clear() {
         attributes = null;
         children = new Vector ();
     }
 
-    /** Forwards creation request to parent if any, otherwise
-    calls super.createElement. Please note: For no
-        namespace, please use Xml.NO_NAMESPACE, null is not a legal
-        value. Currently, null is converted to Xml.NO_NAMESPACE, but
-        future versions may throw an exception. */
+    /** 
+     * Forwards creation request to parent if any, otherwise
+     * calls super.createElement. Please note: For no
+     * namespace, please use Xml.NO_NAMESPACE, null is not a legal
+     * value. Currently, null is converted to Xml.NO_NAMESPACE, but
+     * future versions may throw an exception. */
 
     public Element createElement(
         String namespace,
@@ -71,7 +76,8 @@ public class Element extends Node {
             : this.parent.createElement(namespace, name);
     }
 
-    /** Returns the number of attributes of this element. */
+    /** 
+     * Returns the number of attributes of this element. */
 
     public int getAttributeCount() {
         return attributes == null ? 0 : attributes.size ();
@@ -105,10 +111,11 @@ public class Element extends Node {
 		return null;			
 	}
 
-    /** Returns the document this element is a member of. The document
-    is determined by ascending to the parent of the root element.
-    If the element is not contained in a document, null is
-    returned. */
+    /** 
+     * Returns the document this element is a member of. The document
+     * is determined by ascending to the parent of the root element.
+     * If the element is not contained in a document, null is
+     * returned. */
 
     public Document getDocument() {
 
@@ -121,18 +128,23 @@ public class Element extends Node {
         return null;
     }
 
-    /** returns the (local) name of the element */
+    /** 
+     * returns the (local) name of the element */
 
     public String getName() {
         return name;
     }
 
-    /** returns the namespace of the element */
+    /** 
+     * returns the namespace of the element */
 
     public String getNamespace() {
         return namespace;
     }
 
+
+    /** 
+     * returns the namespace for the given prefix */
     
     public String getNamespace (String prefix) {
     	int cnt = getNamespaceCount ();
@@ -145,8 +157,9 @@ public class Element extends Node {
     }
 
 
-	/** returns the number of declared namespaces, NOT including
-	 * 	parent elements */
+	/** 
+     * returns the number of declared namespaces, NOT including
+	 * parent elements */
 
 	public int getNamespaceCount () {
 		return (prefixes == null ? 0 : prefixes.size ());
@@ -162,13 +175,15 @@ public class Element extends Node {
 	}
 
 
-    /** Returns the parent node of this element */
+    /** 
+     * Returns the parent node of this element */
 
     public Node getParent() {
         return parent;
     }
 
-    /** Returns the parent element if available, null otherwise */
+    /** 
+     * Returns the parent element if available, null otherwise */
 
     public Element getParentElement() {
         return (parent instanceof Element)
@@ -177,8 +192,10 @@ public class Element extends Node {
     }
 
 
-    /** Builds the child elements from the given Parser. By overwriting parse, 
-    an element can take complete control over parsing its subtree. */
+    /** 
+     * Builds the child elements from the given Parser. By overwriting 
+     * parse, an element can take complete control over parsing its 
+     * subtree. */
 
     public void parse(XmlPullParser parser)
         throws IOException, XmlPullParserException {
@@ -223,7 +240,8 @@ public class Element extends Node {
     }
 
 
-    /** Sets the given attribute; a value of null removes the attribute */
+    /** 
+     * Sets the given attribute; a value of null removes the attribute */
 
 	public void setAttribute (String namespace, String name, String value) {
 		if (attributes == null) attributes = new Vector ();
@@ -232,8 +250,9 @@ public class Element extends Node {
 	}
 
 
-	/** Sets the given prefix; a namespace value of null removess the 
-	 * 	prefix */
+	/** 
+     * Sets the given prefix; a namespace value of null removess the 
+	 * prefix */
 
 	public void setPrefix (String prefix, String namespace) {
 		if (prefixes == null) prefixes = new Vector ();
@@ -241,16 +260,18 @@ public class Element extends Node {
 	}
 
 
-    /** sets the name of the element */
+    /** 
+     * sets the name of the element */
 
     public void setName(String name) {
         this.name = name;
     }
 
-    /** sets the namespace of the element. Please note: For no
-        namespace, please use Xml.NO_NAMESPACE, null is not a legal
-        value. Currently, null is converted to Xml.NO_NAMESPACE, but
-        future versions may throw an exception. */
+    /** 
+     * sets the namespace of the element. Please note: For no
+     * namespace, please use Xml.NO_NAMESPACE, null is not a legal
+     * value. Currently, null is converted to Xml.NO_NAMESPACE, but
+     * future versions may throw an exception. */
 
     public void setNamespace(String namespace) {
         if (namespace == null) 
@@ -258,17 +279,19 @@ public class Element extends Node {
         this.namespace = namespace;
     }
 
-    /** Sets the Parent of this element. Automatically called from the
-    add method.  Please use with care, you can simply
-    create inconsitencies in the document tree structure using
-    this method!  */
+    /** 
+     * Sets the Parent of this element. Automatically called from the
+     * add method.  Please use with care, you can simply
+     * create inconsitencies in the document tree structure using
+     * this method!  */
 
     protected void setParent(Node parent) {
         this.parent = parent;
     }
 
 
-    /** Writes this element and all children to the given XmlWriter. */
+    /** 
+     * Writes this element and all children to the given XmlWriter. */
 
     public void write(XmlSerializer writer)
         throws IOException {
