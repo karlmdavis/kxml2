@@ -634,6 +634,7 @@ public class WbxmlParser implements XmlPullParser {
 
         int id = peekId ();
         while(id == Wbxml.SWITCH_PAGE){
+        	nextId = -2;
 			selectPage(readByte(), true);
 			id = peekId();        	
         }
@@ -882,13 +883,13 @@ public class WbxmlParser implements XmlPullParser {
         elementStack = ensureCapacity(elementStack, sp + 4);
         elementStack[sp + 3] = name;
 
-        /*        if (depth >= nspCounts.length) {
-                    int[] bigger = new int[depth + 4];
-                    System.arraycopy(nspCounts, 0, bigger, 0, nspCounts.length);
-                    nspCounts = bigger;
-                }
+        if (depth >= nspCounts.length) {
+             int[] bigger = new int[depth + 4];
+             System.arraycopy(nspCounts, 0, bigger, 0, nspCounts.length);
+             nspCounts = bigger;
+        }
         
-                nspCounts[depth] = nspCounts[depth - 1]; */
+        nspCounts[depth] = nspCounts[depth - 1]; 
 
         for (int i = attributeCount - 1; i > 0; i--) {
             for (int j = 0; j < i; j++) {
