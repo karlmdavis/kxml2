@@ -16,6 +16,13 @@ href="http://www2.tw.ibm.com/developerWorks/tutorial/pdf/wi-kxml-a4.pdf">nice
 introduction to kxml 2</a> for IBM Developer Works.</p>
 
 
+<h2>Recommended Calling Conventions</h2>
+
+When handing an XMLpull parser to subroutines, it is recommended that the current 
+position is on a start tag (allowing the subroutine to analyze the attributes). 
+The post condition should usually be that the current position is the matching end tag.
+
+
 <h2>Parsing Element-Only and Text-Only Content</h2>
 
 <p>General XML content can be parsed with the XML pull API using a loop advanving

@@ -10,6 +10,25 @@
 <p>kXML is a small XML pull parser, specially designed for constrained environments such as Applets, Personal Java or MIDP devices. In contrast to kXML 1, kXML 2 is based on the <a href="http://xmlpull.org">common 
 XML pull API</a>.  </p>
 
+
+<p>Pull based XML parsing combines some of the advantages of SAX and DOM:</p>
+
+<ul>
+
+<li>In contrast to push parsers (SAX), pull parsers such as kXML make it possible to model the
+XML processing routines after the structure of the processed XML document. Events processing
+is similar to an InputStream. If a part of the stream requires special handling, the parser 
+can simply be delegated to a specialized method by handing over the parser. </li>
+
+<li>While the above is also possible with an explicit DOM, DOM usually requires that the whole
+document structure is present in main memory.</li>
+
+<li>In contrast to DOM based parsing, the XML events are accessible immediately when they
+are available, it is not necessary to wait for the whole tree to build up.</li>
+
+</ul>
+
+
 <h2>kXML History and Versions</h2>
 
  <table border="1" >
