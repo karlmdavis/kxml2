@@ -32,6 +32,7 @@ public class Node { //implements XmlIO{
     public static final int ELEMENT = 2;
     public static final int TEXT = 4;
 	public static final int CDSECT = 5;
+    public static final int ENTITY_REF = 6;
     public static final int IGNORABLE_WHITESPACE = 7;
     public static final int PROCESSING_INSTRUCTION = 8;
     public static final int COMMENT = 9;
@@ -266,10 +267,9 @@ public class Node { //implements XmlIO{
 	
                 default :
 					if (parser.getText () == null) 
-					 	throw new RuntimeException 
-					 		("Undefined entity at: "+parser.getPositionDescription());
-
-                    addChild(type == XmlPullParser.ENTITY_REF ? TEXT : type, 
+					 	addChild(ENTITY_REF, parser.getName ());
+                    else 
+                        addChild(type == XmlPullParser.ENTITY_REF ? TEXT : type, 
                     		parser.getText());
                     parser.nextToken();
             }
@@ -356,6 +356,10 @@ public class Node { //implements XmlIO{
 				case COMMENT:
 					writer.comment((String) child);
 					break;
+
+                case ENTITY_REF:
+                    writer.entityRef((String) child);
+                    break;
 
 				case PROCESSING_INSTRUCTION:
 					writer.processingInstruction ((String) child);
