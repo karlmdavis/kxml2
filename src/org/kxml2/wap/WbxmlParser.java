@@ -328,7 +328,7 @@ public class WbxmlParser implements XmlPullParser {
 
 			if (minType >= TEXT) {  // text, see if accumulate
 				
-				if (save != null) text = text != null ? save : save + text;
+				if (save != null) text = text == null ? save : save + text;
 				
 				switch(peekId()) {
 					case Wbxml.ENTITY:

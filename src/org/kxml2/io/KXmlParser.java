@@ -224,7 +224,7 @@ public class KXmlParser implements XmlPullParser {
     }
 
     private final void exception(String desc) throws XmlPullParserException {
-        throw new XmlPullParserException(desc, this, null);
+        throw new XmlPullParserException(desc.length() < 100 ? desc : desc.substring(0, 100) + "\n", this, null);
     }
 
     /** 
@@ -620,12 +620,14 @@ public class KXmlParser implements XmlPullParser {
 
         nspCounts[depth] = nspCounts[depth - 1];
 
+		if(!relaxed){
         for (int i = attributeCount - 1; i > 0; i--) {
             for (int j = 0; j < i; j++) {
                 if (getAttributeName(i).equals(getAttributeName(j)))
                     exception("Duplicate Attribute: " + getAttributeName(i));
             }
         }
+		}
 
         if (processNsp)
             adjustNsp();
@@ -685,7 +687,7 @@ public class KXmlParser implements XmlPullParser {
         unresolved = result == null;
 
         if (unresolved) {
-            if (!token)
+            if (!token && !relaxed)
                 exception("unresolved: &" + code + ";");
         }
         else {
@@ -731,7 +733,7 @@ public class KXmlParser implements XmlPullParser {
     private final void read(char c)
         throws IOException, XmlPullParserException {
         int a = read();
-        if (a != c)
+        if (a != c && !relaxed)
             exception("expected: '" + c + "' actual: '" + ((char) a) + "'");
     }
 
@@ -811,7 +813,7 @@ public class KXmlParser implements XmlPullParser {
             && (c < 'A' || c > 'Z')
             && c != '_'
             && c != ':'
-            && c < 0x0c0)
+            && c < 0x0c0  && !relaxed)
             exception("name expected");
 
         do {
