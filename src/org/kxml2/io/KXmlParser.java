@@ -45,7 +45,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     private String [] elementStack = new String [16];
     private String [] nspStack = new String [8];
     private int [] nspCounts = new int [4]; 
-    private int normalize;
+    //    private int normalize;
 
     // source
 
@@ -83,7 +83,9 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     private int peekCount;
     private boolean wasCR;
 
-    private Hashtable attrs; 
+    private boolean unresolved; 
+    private boolean token;
+
 
     public KXmlParser () {
 	this (Runtime.getRuntime ().freeMemory () >= 1048576 ? 8192 : 128);
@@ -99,9 +101,9 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
 	boolean any = false; 
 
-	// countdown avoids problems with index when removing xmlns attrs
 
-	for (int i = attributeCount * 4 - 4; i >= 0; i -= 4) {
+	for (int i = 0; i < attributeCount << 2; i += 4) { 
+            // * 4 - 4; i >= 0; i -= 4) {
 	    
 	    String attrName = attributes [i+2];
 	    int cut = attrName.indexOf (':'); 
@@ -134,10 +136,13 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    
 		//System.out.println (prefixMap);
 
-		if (!reportNspAttr)
+		if (!reportNspAttr) {
 		    System.arraycopy 
 			(attributes, i+4, attributes, i, 
-			 ((--attributeCount) << 2) -i); 
+			 ((--attributeCount) << 2) -i);
+
+                    i -= 4;
+                } 
 		else
 		    any = true;
 	    }
@@ -168,6 +173,13 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 		    attributes [i] = attrNs;
 		    attributes [i+1] = attrPrefix;
 		    attributes [i+2] = attrName;
+
+                    for (int j = (attributeCount << 2) - 4; j > i; j -= 4) 
+                        if (attrName.equals (attributes [j+2]) 
+                            && attrNs.equals (attributes [j])) 
+                            exception ("Duplicate Attribute: {"
+                                       +attrNs+"}"+attrName);
+                    
 		} 
 	    } 
 	} 
@@ -209,17 +221,17 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     /** common base for next and nextToken. Clears the state, 
 	except from txtPos and whitespace. Does not set the type variable */
 
-    private final int nextImpl (boolean token) throws IOException, XmlPullParserException {
+    private final void nextImpl () throws IOException, XmlPullParserException {
 
 	if (reader == null) exception ("No Input specified");
 	
-	normalize = token ? 0 : 1;
-	attributeCount = 0;
+	attributeCount = -1;
 
 	if (degenerated) {
 	    degenerated = false;
 	    depth--;
-	    return END_TAG;
+	    type = END_TAG;
+            return;
 	}
 	
 	prefix = null;
@@ -227,12 +239,12 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	namespace = null;
 	text = null;
 
-	int type = peekType ();
+	type = peekType ();
 
 	switch (type) {
 
 	case ENTITY_REF:
-	    isWhitespace &= pushEntity (true);
+	    pushEntity ();
 	    break;
 
 	case START_TAG: 
@@ -247,7 +259,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    break;
 
 	case TEXT: 
-	    isWhitespace &= pushText ('<', !token); 
+	    pushText ('<', !token); 
 	    if (depth == 0) {
 		if (isWhitespace) 
 		    type = IGNORABLE_WHITESPACE;
@@ -259,14 +271,11 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
 	case CDSECT:
 	    parseLegacy (true);
-	    isWhitespace = false;
 	    break;
 
 	default:
 	    type = parseLegacy (token);
 	}
-
-	return type;
     }
 
 
@@ -289,19 +298,21 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 		req = "--";
 		term = '-'; 
 	    }
-	    else {
-		result = DOCDECL;
-		req = "DOCTYPE";
-		term = -1;
+            else if (peek (0) == '[') {
+                result = CDSECT;
+                req = "[CDATA[";
+                term = ']';
+            }
+	    else { 
+	        result = DOCDECL;
+	        req = "DOCTYPE";
+	        term = -1;
 	    }
 	}
 	else {
-	    if (c != '[') exception ("illegal: <"+c);
-	    result = CDSECT;
-	    req = "CDATA[";
-	    term = ']';
-	}
-
+            exception ("illegal: <"+c);
+            return -1;
+        }
 
 	for (int i = 0; i < req.length (); i++) 
 	    read (req.charAt (i));
@@ -424,6 +435,21 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     */
 
     private final void push (int c) {
+        if ((c == '\r' || c == '\n') 
+            && (!token || type == START_TAG)) {
+
+            if (c == '\n' && wasCR) {
+                wasCR = false;
+                return;
+            }
+
+            wasCR = c == '\r';
+            c = type == START_TAG ? ' ' : '\n';
+        }
+        else wasCR = false;
+
+        isWhitespace &= c <= ' ';
+
 	if (txtPos == txtBuf.length) {
 	    char[] bigger = new char [txtPos * 4 / 3 + 4];
 	    System.arraycopy (txtBuf, 0, bigger, 0, txtPos);
@@ -440,7 +466,8 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	
 	read (); // <
 	name = readName ();
-	normalize = 2;
+        attributeCount = 0;
+	
 	
 	while (true) { 
 	    skip ();
@@ -522,18 +549,8 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    }
 	}
 
-	if (processNsp) {
+	if (processNsp) 
 	    adjustNsp ();
-
-	    for (int i = attributeCount-1; i > 0; i--) {
-		for (int j = 0; j < i; j++) {
-		    if (getAttributeName (i).equals (getAttributeName (j)) &&
-			getAttributeNamespace (i).equals (getAttributeNamespace (j)))
-			exception
-			    ("Duplicate Attribute: "+getAttributeName (i));
-		}
-	    }
-	}
 	else 
 	    namespace = "";
 
@@ -547,7 +564,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     /** result: isWhitespace; if the setName parameter is set,
 	the name of the entity is stored in "name" */
 
-    private final boolean pushEntity (boolean setName) throws IOException, XmlPullParserException{
+    private final void pushEntity () throws IOException, XmlPullParserException{
 
 	read (); // &
 	
@@ -562,29 +579,27 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	
 	String code = get (pos);
 	txtPos = pos;
-	if (setName) name = code;
+	if (token && type == ENTITY_REF) name = code;
 
 	if (code.charAt (0) == '#') {
 	    int c = (code.charAt (1) == 'x' 
 		     ? Integer.parseInt (code.substring (2), 16) 
 		     : Integer.parseInt (code.substring (1)));
 	    push (c);
-	    return c <= ' ';
+            return;
 	}
 
 	String result = (String) entityMap.get (code);
-	boolean whitespace = true;
 
-	if (result == null) result = "&"+code+";";
+	unresolved = result == null;
 
-	for (int i = 0; i < result.length (); i++) {
-	    char c = result.charAt (i);
-	    if (result.charAt (i) > ' ') 
-		whitespace = false;
-	    push (c);
-	}
-
-	return whitespace;
+        if (unresolved) {
+            if (!token) exception ("unresolved: &"+code+";");
+        }
+        else {
+            for (int i = 0; i < result.length (); i++) 
+                push (result.charAt (i));
+        }
     }
 	
     
@@ -596,10 +611,9 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
 
 
-    private final boolean pushText (int delimiter, 
-				    boolean resolveEntities) throws IOException, XmlPullParserException {
+    private final void pushText (int delimiter, 
+                                 boolean resolveEntities) throws IOException, XmlPullParserException {
 		
-	boolean whitespace = true;
 	int next = peek (0);
 	
 	while (next != -1 && next != delimiter) { // covers eof, '<', '"' 
@@ -610,40 +624,37 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    if (next == '&') {
 		if (!resolveEntities) break;
 		
-		if (!pushEntity (false))
-		    whitespace = false;
-	
+		pushEntity ();
 	    }
-	    else {
-		if (next > ' ') 
-		    whitespace = false;
-
+	    else 
 		push (read ());
-	    }
+	    
 
 	    next = peek (0);
 	}
-	
-	return whitespace;
     }    
     
 
     private final void read (char c) throws IOException, XmlPullParserException {
-	if (read () != c)
-	    exception ("expected: '"+c+"'");
+        int a = read ();
+        if (a != c)
+	    exception ("expected: '"+c+"' actual: '"+((char)a)+"'");
     }
 
     
     private final int read () throws IOException {
-	int result = peek (0);
+	int result = peekCount == 0 ? peek (0) : peek [0];
 	peek [0] = peek [1];
 	peekCount--;
 
 	column++;
+
 	if (result == '\n') {
-	    line++;
-	    column = 1;
+
+            line++;
+            column = 1;
 	}
+
 
 	return result;
     }
@@ -669,16 +680,23 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 		srcPos = 1;
 	    }
 
-	    if (wasCR && nw == '\n') 
-		wasCR = false;
-	    else if (nw == '\r' && normalize > 0) {
-		wasCR = true;
-		peek [peekCount++] = normalize > 1 ? ' ' : '\n';
-	    }
+            /*
+            if ((nw == '\n' || nw == '\r') 
+                && (type == START_TAG || !token)) {
+
+                if (!wasCR || nw == '\r')
+                    peek [peekCount++] = (type == START_TAG) 
+                        ? ' ' : '\n';
+
+                wasCR = nw == '\r';
+            }
 	    else {
-		peek [peekCount++] = (nw == '\n' && normalize > 1) ? ' ' : nw;
-		wasCR = false;
-	    }
+            */
+
+            peek [peekCount++] = nw;
+
+                //	wasCR = false;
+                //  }
 	}
 
 	return peek [pos];
@@ -737,6 +755,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	name = null;
 	namespace = null;
 	degenerated = false;
+        attributeCount = -1;
 
 	if (reader == null) return;
 
@@ -814,7 +833,8 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     
     public String getPositionDescription () {
 	
-	StringBuffer buf = new StringBuffer (TYPES [type]);
+	StringBuffer buf = new StringBuffer 
+            (type < TYPES.length ? TYPES [type] : "unknown");
 	buf.append (' ');
 	
 	if (type == START_TAG || type == END_TAG) {	    
@@ -867,25 +887,32 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     
     
     public boolean isWhitespace() throws XmlPullParserException {
-	if (type != TEXT && type != IGNORABLE_WHITESPACE) 
+	if (type != TEXT && type != IGNORABLE_WHITESPACE && type != CDSECT) 
 	     exception (ILLEGAL_TYPE);
 	return isWhitespace;
     }
     
     
     public String getText () {
-	return type < TEXT ? null : get (0);
+	return type < TEXT || (type == ENTITY_REF && unresolved) 
+            ? null : get (0);
     }
     
     public char[] getTextCharacters (int [] poslen) {
-	if (type < TEXT) {
-	    poslen [0] = -1;
-	    poslen [1] = -1;
-	    return null;
-	}
-	poslen [0] = 0;
-	poslen [1] = txtPos;
-	return txtBuf;
+	if (type >= TEXT) {
+            if (type == ENTITY_REF) {
+                poslen [0] = 0;
+                poslen [1] = name.length ();
+                return name.toCharArray ();
+            }
+            poslen [0] = 0;
+            poslen [1] = txtPos;
+            return txtBuf;
+        }
+        
+        poslen [0] = -1;
+        poslen [1] = -1;
+        return null;
     }
 
 
@@ -912,7 +939,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     
 
     public int getAttributeCount() {
-	return type == START_TAG ? attributeCount : -1;
+	return attributeCount;
     }
     
 
@@ -963,13 +990,18 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
 	txtPos = 0;
 	isWhitespace = true;
-	int curr;
-	
+	int minType = 9999;
+	token = false;
+
 	do {
-	    curr = nextImpl (false);
-	    if (curr <= TEXT) type = curr; 
+	    nextImpl ();
+            if (type < minType) minType = type;
+            //	    if (curr <= TEXT) type = curr; 
 	}
-	while (curr > TEXT || curr == TEXT && peekType () >= TEXT);
+	while (minType > TEXT || (minType == TEXT && peekType () >= TEXT));
+
+        //        if (type > TEXT) type = TEXT;
+        type = minType;
 
 	return type;
     }
@@ -981,7 +1013,9 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	isWhitespace = true;
 	txtPos = 0;
 
-	return type = nextImpl (true);
+        token = true;
+        nextImpl ();
+	return type; 
     }
 	
 
