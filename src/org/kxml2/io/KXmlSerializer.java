@@ -283,8 +283,8 @@ public class KXmlSerializer implements XmlSerializer {
 		writeEscaped(text, -1);
 	}
 
-	public void text(char[] text, int start, int len) {
-		throw new RuntimeException("NYI");
+	public void text(char[] text, int start, int len) throws IOException {
+		text (new String (text, start, len));
 	}
 
 	public void cdsect(String data) throws IOException {
