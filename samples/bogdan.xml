@@ -1,0 +1,10 @@
+<root>
+   <foo>bar</foo>
+   <hugo xmlns="http://hugospace.org">
+     <hugochild>This is in a <!-- comment -->new namespace</hugochild>
+   </hugo>
+   <ContentData>(06/15/2004 00:31) &lt;HTML&gt;&lt;BODY
+bgcolor="#ffffff"&gt;&lt;FONT
+LANG="0"&gt;hiho&lt;/FONT&gt;&lt;/BODY&gt;&lt;/HTML&gt;</ContentData>
+   <bar testattr='123abc' />
+ </root>

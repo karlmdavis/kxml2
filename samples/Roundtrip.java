@@ -88,7 +88,10 @@ public class Roundtrip {
                 break;
 
             case XmlPullParser.ENTITY_REF :
-                serializer.entityRef(parser.getName());
+            	if(parser.getText() != null)
+            		serializer.text(parser.getText());
+            	else 
+            		serializer.entityRef(parser.getName());
                 break;
 
             case XmlPullParser.CDSECT :
