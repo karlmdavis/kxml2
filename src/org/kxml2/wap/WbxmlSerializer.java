@@ -48,6 +48,9 @@ public class WbxmlSerializer implements XmlSerializer {
     ByteArrayOutputStream stringTableBuf = new ByteArrayOutputStream();
 
     String pending;
+    int depth;
+    String name;
+    String namespace;
     Vector attributes = new Vector();
 
     Hashtable attrStartTable = new Hashtable();
@@ -82,13 +85,25 @@ public class WbxmlSerializer implements XmlSerializer {
     public void entityRef (String er) {
         throw new RuntimeException ("EntityReference not supported for WBXML");
     }
+    
+    public int getDepth() {
+    	return depth;
+    }
 
 
     public boolean getFeature (String name) {
         return false;
     }
     
-    public String getPrefix(String nsp, boolean create) {
+	public String getNamespace() {
+		throw new RuntimeException("NYI");
+	}
+	
+	public String getName() {
+		throw new RuntimeException("NYI");
+	}
+	
+	public String getPrefix(String nsp, boolean create) {
         throw new RuntimeException ("NYI");
     }
     
@@ -233,7 +248,8 @@ public class WbxmlSerializer implements XmlSerializer {
 
         checkPending(false);
         pending = name;
-
+		depth++;
+		
         return this;
     }
 
@@ -267,6 +283,8 @@ public class WbxmlSerializer implements XmlSerializer {
             checkPending(true);
         else
             buf.write(Wbxml.END);
+
+		depth--;
 
         return this;
     }
