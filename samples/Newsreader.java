@@ -33,15 +33,15 @@ public class Newsreader extends MIDlet implements CommandListener {
 				//		parser.relaxed = true;
 
 				parser.nextTag();
-				parser.require(parser.START_TAG, null, "backslash");
+				parser.require(XmlPullParser.START_TAG, null, "backslash");
 
-				while (parser.nextTag () != parser.END_TAG)
+				while (parser.nextTag () != XmlPullParser.END_TAG)
 					readStory(parser);
 
-				parser.require(parser.END_TAG, null, "backslash");
+				parser.require(XmlPullParser.END_TAG, null, "backslash");
 				parser.next();
 
-				parser.require(parser.END_DOCUMENT, null, null);
+				parser.require(XmlPullParser.END_DOCUMENT, null, null);
 			} catch (Exception e) {
 				e.printStackTrace();
 				descriptions.addElement(e.toString());
@@ -54,14 +54,14 @@ public class Newsreader extends MIDlet implements CommandListener {
 		void readStory(KXmlParser parser)
 			throws IOException, XmlPullParserException {
 
-			parser.require(parser.START_TAG, null, "story");
+			parser.require(XmlPullParser.START_TAG, null, "story");
 
 			String title = null;
 			String description = null;
 
-			while (parser.nextTag() != parser.END_TAG) {
+			while (parser.nextTag() != XmlPullParser.END_TAG) {
 
-				parser.require(parser.START_TAG, null, null);
+				parser.require(XmlPullParser.START_TAG, null, null);
 				String name = parser.getName();
 
 				String text = parser.nextText();
@@ -73,9 +73,9 @@ public class Newsreader extends MIDlet implements CommandListener {
 				else if (name.equals("description"))
 					description = text;
 
-				parser.require(parser.END_TAG, null, name);
+				parser.require(XmlPullParser.END_TAG, null, name);
 			}
-			parser.require(parser.END_TAG, null, "story");
+			parser.require(XmlPullParser.END_TAG, null, "story");
 
 			if (title != null) {
 				descriptions.addElement(""+description);

@@ -28,17 +28,17 @@ public class Weblogs {
         parser.setInput(is, null);
 
         parser.nextTag();
-        parser.require(parser.START_TAG, "", "weblogs");
+        parser.require(XmlPullParser.START_TAG, "", "weblogs");
 
-        while (parser.nextTag() == parser.START_TAG) {
+        while (parser.nextTag() == XmlPullParser.START_TAG) {
             String url = readSingle(parser);
             if (url != null)
                 result.addElement(url);
         }
-        parser.require(parser.END_TAG, "", "weblogs");
+        parser.require(XmlPullParser.END_TAG, "", "weblogs");
 
         parser.next();
-        parser.require(parser.END_DOCUMENT, null, null);
+        parser.require(XmlPullParser.END_DOCUMENT, null, null);
 
 		is.close ();
 		parser.setInput (null);
@@ -50,16 +50,16 @@ public class Weblogs {
         throws IOException, XmlPullParserException {
 
         String url = null;
-        parser.require(parser.START_TAG, "", "log");
+        parser.require(XmlPullParser.START_TAG, "", "log");
 
-        while (parser.nextTag() == parser.START_TAG) {
+        while (parser.nextTag() == XmlPullParser.START_TAG) {
             String name = parser.getName();
             String content = parser.nextText();
             if (name.equals("url"))
                 url = content;
-            parser.require(parser.END_TAG, "", name);
+            parser.require(XmlPullParser.END_TAG, "", name);
         }
-        parser.require(parser.END_TAG, "", "log");
+        parser.require(XmlPullParser.END_TAG, "", "log");
         return url;
     }
 
