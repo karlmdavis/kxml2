@@ -201,7 +201,7 @@ public class KXmlSerializer implements XmlSerializer {
 				writer.write (':');
 				writer.write(nspStack[i*2]);
 			}
-			writer.write ("=\'");
+			writer.write ("=\"");
 			writeEscaped (nspStack[i*2+1], '"');
 			writer.write ('"');
 		}
@@ -225,7 +225,7 @@ public class KXmlSerializer implements XmlSerializer {
 				writer.write (':');
 				writer.write(nspStack[cnt*2]);
 			}
-			writer.write ("=\'");
+			writer.write ("=\"");
 			writeEscaped (nspStack[cnt*2+1], '"');
 			writer.write ('"');
 		}
