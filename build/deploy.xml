@@ -4,16 +4,16 @@
       
   <Release>
      <version>2.28</version>
-     <description>testdescription</description>
-     <project>kxml2</project>
+     <description>@description@</description>
+     <project>kXML 2</project>
      <file>
         <Item href="#source" />
      </file>
   </Release>
   
   <ReleaseFile name="source" >
-     <name>kxml-source.zip</name>
-     <data href="../dist/kxml-source.zip" />
+     <name>kxml-src.zip</name>
+     <data href="../dist/kxml2-src.zip" />
   </ReleaseFile>
   
 </il:Update>

@@ -1304,4 +1304,27 @@ public class KXmlParser implements XmlPullParser {
         throws XmlPullParserException {
         throw new XmlPullParserException("unsupported property: " + property);
     }
+    
+	/**
+	  * Skip sub tree that is currently porser positioned on.
+	  * <br>NOTE: parser must be on START_TAG and when funtion returns
+	  * parser will be positioned on corresponding END_TAG. 
+	  */
+	
+    //	Implementation copied from Alek's mail... 
+    
+	 public void skipSubTree()
+		 throws XmlPullParserException, IOException
+	 {
+		 require(START_TAG, null, null);
+		 int level = 1;
+		 while(level > 0) {
+			 int eventType = next();
+			 if(eventType == END_TAG) {
+				 --level;
+			 } else if(eventType == START_TAG) {
+				 ++level;
+			 }
+		 }
+	 } 
 }
