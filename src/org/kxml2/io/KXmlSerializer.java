@@ -235,7 +235,7 @@ public class KXmlSerializer implements XmlSerializer {
         	writer.write ("' ");
         }
         if (standalone != null) {
-        	writer.write ("encoding='");
+        	writer.write ("standalone='");
         	writer.write (standalone.booleanValue() ? "yes" : "no");
         	writer.write ("' ");
         }
