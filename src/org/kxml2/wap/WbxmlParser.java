@@ -1,4 +1,4 @@
-/* Copyright (c) 2002,2003, Stefan Haustein, Oberhausen, Rhld., Germany
+/* Copyright (c) 2002,2003,2004 Stefan Haustein, Oberhausen, Rhld., Germany
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,7 +18,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE. */
 
-// Contributors: Bjorn Aadland
+// Contributors: Bjorn Aadland, Chris Bartley, Nicola Fankhauser, 
+//               Victor Havin,  Christian Kurzke, Bogdan Onoiu,
+//               Jain Sanjay, David Santoro.
 
 package org.kxml2.wap;
 
@@ -745,7 +747,9 @@ public class WbxmlParser implements XmlPullParser {
 
                     wapExtensionData = buf;
                 } // case OPAQUE
-                default:
+            	break;
+            	
+            default:
                 exception("illegal id: "+id);
         } // SWITCH
     }
@@ -757,6 +761,11 @@ public class WbxmlParser implements XmlPullParser {
 
         while (id != 1) {
 
+        	while(id == Wbxml.SWITCH_PAGE){
+                selectPage(readByte(), false);
+                id = readByte();
+            } 
+        	
             String name = resolveId(attrStartTable, id);
             StringBuffer value;
 
