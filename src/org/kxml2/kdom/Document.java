@@ -11,8 +11,27 @@ import org.xmlpull.v1.*;
 public class Document extends Node {
 
     protected int rootIndex = -1;
+    String encoding;
+    Boolean standalone;
 
     /** returns "#document" */
+
+    public String getEncoding () {
+        return encoding;
+    }
+    
+    public void setEncoding(String enc) {
+        this.encoding = enc;
+    }
+    
+    public void setStandalone (Boolean standalone) {
+        this.standalone = standalone;
+    }
+    
+    public Boolean getStandalone() {
+        return standalone;
+    }
+
 
     public String getName() {
         return "#document";
@@ -44,6 +63,10 @@ public class Document extends Node {
 
 		parser.require(parser.START_DOCUMENT, null, null);
 		parser.nextToken ();        	
+
+        encoding = parser.getInputEncoding();
+        standalone = (Boolean)parser.getProperty ("http://xmlpull.org/v1/doc/properties.html#xmldecl-standalone");
+        
         super.parse(parser);
 
         if (parser.getEventType() != parser.END_DOCUMENT)
@@ -68,4 +91,19 @@ public class Document extends Node {
 
         return (Element) getChild(rootIndex);
     }
+    
+    
+    /** Writes this node to the given XmlWriter. For node and document,
+        this method is identical to writeChildren, except that the
+        stream is flushed automatically. */
+
+    public void write(XmlSerializer writer)
+        throws IOException {
+        
+        writer.startDocument(encoding, standalone);
+        writeChildren(writer);
+        writer.endDocument();
+    }
+    
+    
 }

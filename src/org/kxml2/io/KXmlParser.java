@@ -98,6 +98,15 @@ public class KXmlParser implements XmlPullParser {
             new char[Runtime.getRuntime().freeMemory() >= 1048576 ? 8192 : 128];
     }
 
+
+    private final boolean isProp (String n1, boolean prop, String n2) {
+        if (!n1.startsWith("http://xmlpull.org/v1/doc/")) return false;
+        if (prop) 
+            return n1.substring (42).equals(n2);            
+        else 
+            return n1.substring (40).equals(n2);
+    }
+
     private final boolean adjustNsp() throws XmlPullParserException {
 
         boolean any = false;
@@ -981,8 +990,7 @@ public class KXmlParser implements XmlPullParser {
     public boolean getFeature(String feature) {
         if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals(feature))
             return processNsp;
-        else if (
-            "http://xmlpull.org/v1/doc/features.html#relaxed".equals(feature))
+        else if (isProp(feature, false, "relaxed"))
             return relaxed;
         else
             return false;
@@ -1000,9 +1008,9 @@ public class KXmlParser implements XmlPullParser {
     }
 
     public Object getProperty(String property) {
-        if ("http://xmlpull.org/v1/doc/properties.html#xmldecl-version".equals(property))
+        if (isProp(property, true, "xmldecl-version"))
             return version;
-        if ("http://xmlpull.org/v1/doc/properties.html#xmldecl-standalone".equals(property))            
+        if (isProp(property, true, "xmldecl-standalone"))            
             return standalone;
         return null;
     }
@@ -1275,8 +1283,7 @@ public class KXmlParser implements XmlPullParser {
         throws XmlPullParserException {
         if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals(feature))
             processNsp = value;
-        else if (
-            "http://xmlpull.org/v1/doc/features.html#relaxed".equals(feature))
+        else if (isProp(feature, false, "relaxed"))
             relaxed = value;
         else
             exception("unsupported feature: " + feature);
