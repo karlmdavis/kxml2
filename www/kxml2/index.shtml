@@ -6,7 +6,7 @@
 <h1>kXML 2</h1>
 
 kXML 2 implements the XmlPull API. Please find general information about
-XmlPull parsers at <a href="http://xmlpull.org>xmlpull.org</a>.
+XmlPull parsers at <a href="http://xmlpull.org">xmlpull.org</a>.
 
 <h2>Parsing Element-Only and Text-Only Content</h2>
 

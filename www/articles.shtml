@@ -1,7 +1,7 @@
 <html>
 <head><title>Articles and HowTos about kXML</title></head>
 <body bgcolor="#ffffff">
-<!--#include virtual="prolog.html" -->
+<!--#include virtual="prolog.shtml" -->
 
 <h1>Articles about kXML</h1>
 
@@ -54,6 +54,6 @@
 </tr>
 </table>
 
-<!--#include virtual="epilog.html" -->
+<!--#include virtual="epilog.shtml" -->
 </body>
 </html>
