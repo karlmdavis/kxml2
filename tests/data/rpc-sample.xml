@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<methodResponse>
+  <params>
+    <param>
+      <value><string>South Dakota</string></value>
+    </param>
+    <param>
+      <value><string>North Dakota</string></value>
+    </param>
+    <param>
+      <value><i4>313132</i4></value>
+    </param>
+  </params>
+</methodResponse> 
