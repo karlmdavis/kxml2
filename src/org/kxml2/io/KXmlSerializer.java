@@ -116,10 +116,10 @@ public class KXmlSerializer implements XmlSerializer {
                         break;
                     }
                 default :
-                	if(c < ' ')
-						throw new IllegalArgumentException("Illegal control code:"+((int) c));
+                	//if(c < ' ')
+					//	throw new IllegalArgumentException("Illegal control code:"+((int) c));
 
-                    if ((c < 127 || unicode))
+                    if (c >= ' ' && c !='@' && (c < 127 || unicode))
                         writer.write(c);
                     else
                         writer.write("&#" + ((int) c) + ";");
