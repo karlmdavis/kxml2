@@ -22,7 +22,7 @@ import org.xmlpull.v1.*;
 
 public class KXmlSerializer implements XmlSerializer {
 
-    static final String UNDEFINED = ":";
+    //    static final String UNDEFINED = ":";
 
     private Writer writer;
 
@@ -30,13 +30,15 @@ public class KXmlSerializer implements XmlSerializer {
     private int auto;
     private int depth;
 
-    private String[] elementStack = new String[12]; //nsp/prefix/name
+    private String[] elementStack = new String[12];
+    //nsp/prefix/name
     private int[] nspCounts = new int[4];
-    private String[] nspStack = new String[8]; //prefix/nsp
+    private String[] nspStack = new String[8];
+    //prefix/nsp; both empty are ""
     private boolean[] indent = new boolean[4];
     private boolean unicode;
     private String encoding;
-    
+
     private final void check() throws IOException {
         if (!pending)
             return;
@@ -52,7 +54,8 @@ public class KXmlSerializer implements XmlSerializer {
         nspCounts[depth + 1] = nspCounts[depth];
     }
 
-    private final void writeEscaped(String s, int quot) throws IOException {
+    private final void writeEscaped(String s, int quot)
+        throws IOException {
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -69,15 +72,16 @@ public class KXmlSerializer implements XmlSerializer {
                 case '"' :
                 case '\'' :
                     if (c == quot) {
-                        writer.write(c == '"' ? "&quot;" : "&apos;");
+                        writer.write(
+                            c == '"' ? "&quot;" : "&apos;");
                         break;
                     }
                 default :
-                    if (c < 127 || unicode) 
+                    if (c < 127 || unicode)
                         writer.write(c);
                     else
-                        writer.write("&#"+((int) c)+";");
-                        
+                        writer.write("&#" + ((int) c) + ";");
+
             }
         }
     }
@@ -89,8 +93,7 @@ public class KXmlSerializer implements XmlSerializer {
     			writer.write(' ');
     	}*/
 
-
-    public void docdecl(String dd) throws IOException{
+    public void docdecl(String dd) throws IOException {
         writer.write("<!DOCTYPE");
         writer.write(dd);
         writer.write(">");
@@ -98,8 +101,9 @@ public class KXmlSerializer implements XmlSerializer {
 
     public void endDocument() throws IOException {
         while (depth > 0) {
-            endTag (elementStack[depth * 3 -3], 
-            elementStack[depth * 3 -1]);
+            endTag(
+                elementStack[depth * 3 - 3],
+                elementStack[depth * 3 - 1]);
         }
         flush();
     }
@@ -113,47 +117,67 @@ public class KXmlSerializer implements XmlSerializer {
 
     public boolean getFeature(String name) {
         //return false;
-      return ( "http://xmlpull.org/v1/doc/features.html#indent-output".equals(name)) 
-        ? indent[depth] : false;
+        return (
+            "http://xmlpull.org/v1/doc/features.html#indent-output"
+                .equals(
+                name))
+            ? indent[depth]
+            : false;
     }
 
-
-	public String getPrefix (String namespace, boolean create) {
+    public String getPrefix(String namespace, boolean create) {
         try {
-		  return getPrefix (namespace, false, create);
+            return getPrefix(namespace, false, create);
         }
         catch (IOException e) {
-            throw new RuntimeException (e.toString());
+            throw new RuntimeException(e.toString());
         }
-	}
+    }
 
     private final String getPrefix(
         String namespace,
         boolean includeDefault,
-        boolean create) throws IOException {
+        boolean create)
+        throws IOException {
 
         for (int i = nspCounts[depth] * 2 - 2; i >= 0; i -= 2) {
-            if (nspStack[i + 1].equals(namespace) && 
-                (includeDefault || nspStack [i] != null))
-                return nspStack[i];
+            if (nspStack[i + 1].equals(namespace)
+                && (includeDefault || nspStack[i] != null)) {
+                String cand = nspStack[i];
+                for (int j = i + 2;
+                    j < nspCounts[depth] * 2;
+                    j++) {
+                    if (nspStack[j].equals(cand)) {
+                        cand = null;
+                        break;
+                    }
+                }
+                if (cand != null)
+                    return cand;
+            }
         }
 
         if (!create)
-            return UNDEFINED;
+            return null;
 
         String prefix;
 
-        do {
-            prefix = "n" + (auto++);
-            for (int i = nspCounts[depth] * 2 - 2; i >= 0; i -= 2) {
-                if (prefix.equals (nspStack [i])) {
-                    prefix = null;
-                    break;
+        if ("".equals(namespace))
+            prefix = "";
+        else {
+            do {
+                prefix = "n" + (auto++);
+                for (int i = nspCounts[depth] * 2 - 2;
+                    i >= 0;
+                    i -= 2) {
+                    if (prefix.equals(nspStack[i])) {
+                        prefix = null;
+                        break;
+                    }
                 }
             }
+            while (prefix == null);
         }
-        while (prefix == null);
-
         depth--;
         setPrefix(prefix, namespace);
         depth++;
@@ -164,33 +188,39 @@ public class KXmlSerializer implements XmlSerializer {
         throw new RuntimeException("Unsupported property");
     }
 
-    public void ignorableWhitespace(String s) throws IOException {
+    public void ignorableWhitespace(String s)
+        throws IOException {
         text(s);
     }
 
     public void setFeature(String name, boolean value) {
-       if ( "http://xmlpull.org/v1/doc/features.html#indent-output".equals(name)) {
+        if ("http://xmlpull.org/v1/doc/features.html#indent-output"
+            .equals(name)) {
             indent[depth] = value;
         }
-        else 
+        else
             throw new RuntimeException("Unsupported Feature");
     }
 
     public void setProperty(String name, Object value) {
-        throw new RuntimeException("Unsupported Property:" + value);
+        throw new RuntimeException(
+            "Unsupported Property:" + value);
     }
 
-    public void setPrefix(String prefix, String namespace) throws IOException{
+    public void setPrefix(String prefix, String namespace)
+        throws IOException {
 
         check();
+        if (prefix == null)
+            prefix = "";
+        if (namespace == null)
+            namespace = "";
 
         String defined = getPrefix(namespace, true, false);
 
-        if (prefix.equals ("")) prefix = null;
-
         // boil out if already defined
 
-        if (defined == prefix || (prefix != null && prefix.equals(defined)))
+        if (prefix.equals(defined))
             return;
 
         int pos = (nspCounts[depth + 1]++) << 1;
@@ -208,66 +238,72 @@ public class KXmlSerializer implements XmlSerializer {
     public void setOutput(Writer writer) {
         this.writer = writer;
 
-       // elementStack = new String[12]; //nsp/prefix/name
+        // elementStack = new String[12]; //nsp/prefix/name
         //nspCounts = new int[4];
         //nspStack = new String[8]; //prefix/nsp
         //indent = new boolean[4];
-    
 
         nspCounts[0] = 2;
         nspCounts[1] = 2;
+        nspStack[0] = "";
         nspStack[1] = "";
-        nspStack[0] = null;
         nspStack[2] = "xml";
         nspStack[3] = "http://www.w3.org/XML/1998/namespace";
         pending = false;
         auto = 0;
         depth = 0;
 
-        unicode = false;        
+        unicode = false;
     }
 
     public void setOutput(OutputStream os, String encoding)
         throws IOException {
-        if (os == null) throw new IllegalArgumentException ();
+        if (os == null)
+            throw new IllegalArgumentException();
         setOutput(
             encoding == null
                 ? new OutputStreamWriter(os)
                 : new OutputStreamWriter(os, encoding));
         this.encoding = encoding;
-        if (encoding != null && encoding.toLowerCase().startsWith("utf")) 
-           unicode=true;
+        if (encoding != null
+            && encoding.toLowerCase().startsWith("utf"))
+            unicode = true;
     }
 
-    public void startDocument(String encoding, Boolean standalone)
+    public void startDocument(
+        String encoding,
+        Boolean standalone)
         throws IOException {
         writer.write("<?xml version='1.0' ");
 
         if (encoding != null) {
             this.encoding = encoding;
-            if (encoding.toLowerCase().startsWith("utf")) 
-                unicode=true;
+            if (encoding.toLowerCase().startsWith("utf"))
+                unicode = true;
         }
-        
-        if(this.encoding != null) {
-        	writer.write ("encoding='");
-        	writer.write (this.encoding);
-        	writer.write ("' ");
+
+        if (this.encoding != null) {
+            writer.write("encoding='");
+            writer.write(this.encoding);
+            writer.write("' ");
         }
-        
+
         if (standalone != null) {
-        	writer.write ("standalone='");
-        	writer.write (standalone.booleanValue() ? "yes" : "no");
-        	writer.write ("' ");
+            writer.write("standalone='");
+            writer.write(
+                standalone.booleanValue() ? "yes" : "no");
+            writer.write("' ");
         }
-        writer.write ("?>");
+        writer.write("?>");
     }
 
-    public XmlSerializer startTag(String namespace, String name) throws IOException {
+    public XmlSerializer startTag(String namespace, String name)
+        throws IOException {
         check();
-        
-        if (namespace==null) namespace="";
-        
+
+        if (namespace == null)
+            namespace = "";
+
         if (indent[depth]) {
             writer.write("\r\n");
             for (int i = 0; i < depth; i++)
@@ -298,17 +334,19 @@ public class KXmlSerializer implements XmlSerializer {
         elementStack[esp] = name;
 
         writer.write('<');
-        if (prefix != null) {
+        if (!"".equals(prefix)) {
             writer.write(prefix);
             writer.write(':');
         }
 
         writer.write(name);
 
-        for (int i = nspCounts[depth - 1]; i < nspCounts[depth]; i++) {
+        for (int i = nspCounts[depth - 1];
+            i < nspCounts[depth];
+            i++) {
             writer.write(' ');
             writer.write("xmlns");
-            if (nspStack[i * 2] != null) {
+            if (!"".equals(nspStack[i * 2])) {
                 writer.write(':');
                 writer.write(nspStack[i * 2]);
             }
@@ -322,17 +360,22 @@ public class KXmlSerializer implements XmlSerializer {
         return this;
     }
 
-    public XmlSerializer attribute(String namespace, String name, String value)
+    public XmlSerializer attribute(
+        String namespace,
+        String name,
+        String value)
         throws IOException {
         if (!pending)
             throw new IllegalStateException("illegal position for attribute");
 
         int cnt = nspCounts[depth];
-        if (namespace==null) namespace="";
+        if (namespace == null)
+            namespace = "";
 
-        String prefix = (namespace == null || "".equals (namespace)) 
-        	? null 
-            : getPrefix(namespace, false, true);
+        String prefix =
+            "".equals(namespace)
+                ? ""
+                : getPrefix(namespace, false, true);
 
         if (cnt != nspCounts[depth]) {
             writer.write(' ');
@@ -347,7 +390,7 @@ public class KXmlSerializer implements XmlSerializer {
         }
 
         writer.write(' ');
-        if (prefix != null) {
+        if (!"".equals(prefix)) {
             writer.write(prefix);
             writer.write(':');
         }
@@ -371,10 +414,12 @@ public class KXmlSerializer implements XmlSerializer {
     		writer.close();
     	}
     */
-    public XmlSerializer endTag(String namespace, String name) throws IOException {
+    public XmlSerializer endTag(String namespace, String name)
+        throws IOException {
 
         depth--;
-        if (namespace==null) namespace="";
+        if (namespace == null)
+            namespace = "";
 
         if (!elementStack[depth * 3].equals(namespace)
             || !elementStack[depth * 3 + 2].equals(name))
@@ -393,7 +438,7 @@ public class KXmlSerializer implements XmlSerializer {
 
             writer.write("</");
             String prefix = elementStack[depth * 3 + 1];
-            if (prefix != null) {
+            if (!"".equals(prefix)) {
                 writer.write(prefix);
                 writer.write(':');
             }
@@ -412,7 +457,8 @@ public class KXmlSerializer implements XmlSerializer {
         return this;
     }
 
-    public XmlSerializer text(char[] text, int start, int len) throws IOException {
+    public XmlSerializer text(char[] text, int start, int len)
+        throws IOException {
         text(new String(text, start, len));
         return this;
     }
@@ -431,7 +477,8 @@ public class KXmlSerializer implements XmlSerializer {
         writer.write("-->");
     }
 
-    public void processingInstruction(String pi) throws IOException {
+    public void processingInstruction(String pi)
+        throws IOException {
         check();
         writer.write("<?");
         writer.write(pi);
