@@ -36,7 +36,7 @@ public class KXmlParser implements XmlPullParser {
 	static final private int LEGACY = 999;
 
 	// general
-
+	
 	private boolean reportNspAttr;
 	private boolean processNsp;
 	private boolean relaxed;
@@ -216,11 +216,12 @@ public class KXmlParser implements XmlPullParser {
 		if (reader == null)
 			exception("No Input specified");
 
+		if (type == END_TAG) depth--;
+
 		attributeCount = -1;
 
 		if (degenerated) { 
 			degenerated = false;
-			depth--;
 			type = END_TAG;
 			return;
 		}
@@ -260,10 +261,6 @@ public class KXmlParser implements XmlPullParser {
 				}
 				break;
 
-			case CDSECT :
-				parseLegacy(true);
-				break;
-
 			default :
 				type = parseLegacy(token);
 		}
@@ -291,6 +288,7 @@ public class KXmlParser implements XmlPullParser {
 				result = CDSECT;
 				req = "[CDATA[";
 				term = ']';
+				push = true;
 			} else {
 				result = DOCDECL;
 				req = "DOCTYPE";
@@ -375,10 +373,10 @@ public class KXmlParser implements XmlPullParser {
 		read(); // '/'
 		name = readName();
 
-		int sp = (--depth) << 2;
+		int sp = (depth-1) << 2;
 
 		if (!name.equals(elementStack[sp + 3]))
-			exception("expected: " + elementStack[depth]);
+			exception("expected: " + elementStack[sp+3]);
 
 		skip();
 		read('>');
@@ -398,8 +396,6 @@ public class KXmlParser implements XmlPullParser {
 				switch (peek(1)) {
 					case '/' :
 						return END_TAG;
-					case '[' :
-						return CDSECT;
 					case '?' :
 					case '!' :
 						return LEGACY;
@@ -725,6 +721,7 @@ public class KXmlParser implements XmlPullParser {
 		namespace = null;
 		degenerated = false;
 		attributeCount = -1;
+		encoding = null;
 
 		if (reader == null)
 			return;
@@ -745,10 +742,14 @@ public class KXmlParser implements XmlPullParser {
 	public void setInput(InputStream is, String enc)
 		throws XmlPullParserException {
 
+		if (is == null) throw new IllegalArgumentException ();
 		// add heuristics here!
 
 		try {
-			setInput(new InputStreamReader(is, enc));
+			setInput(enc == null 
+				? new InputStreamReader (is) 
+				: new InputStreamReader(is, enc));
+			encoding = enc;
 		}
 		catch (IOException e) {
 			throw new XmlPullParserException (e.toString (), this, e);
@@ -798,7 +799,7 @@ public class KXmlParser implements XmlPullParser {
 		if ("xmlns".equals(prefix))
 			return "http://www.w3.org/2000/xmlns/";
 
-		for (int i = (getNamespaceCount(getDepth()) << 1) - 2; i >= 0; i -= 2) {
+		for (int i = (getNamespaceCount(depth) << 1) - 2; i >= 0; i -= 2) {
 			if (prefix == null) {
 				if (nspStack[i] == null)
 					return nspStack[i + 1];
@@ -970,7 +971,7 @@ public class KXmlParser implements XmlPullParser {
 			if (type < minType)
 				minType = type;
 			//	    if (curr <= TEXT) type = curr; 
-		} while (minType > TEXT || (minType == TEXT && peekType() >= TEXT));
+		} while (minType > CDSECT || (minType >= TEXT && peekType() >= TEXT));
 
 		//        if (type > TEXT) type = TEXT;
 		type = minType;
