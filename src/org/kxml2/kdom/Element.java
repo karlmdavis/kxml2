@@ -146,14 +146,14 @@ public class Element extends Node {
     /** 
      * returns the namespace for the given prefix */
     
-    public String getNamespace (String prefix) {
+    public String getNamespaceUri (String prefix) {
     	int cnt = getNamespaceCount ();
 		for (int i = 0; i < cnt; i++) {
 			if (prefix == getNamespacePrefix (i) ||
 				(prefix != null && prefix.equals (getNamespacePrefix (i))))
 				return getNamespaceUri (i);	
 		}
-		return parent instanceof Element ? ((Element) parent).getNamespace (prefix) : null;
+		return parent instanceof Element ? ((Element) parent).getNamespaceUri (prefix) : null;
     }
 
 
@@ -200,9 +200,6 @@ public class Element extends Node {
     public void parse(XmlPullParser parser)
         throws IOException, XmlPullParserException {
 
-        name = parser.getName();
-        namespace = parser.getNamespace();
-        
         for (int i = parser.getNamespaceCount (parser.getDepth () - 1);
         	i < parser.getNamespaceCount (parser.getDepth ()); i++) {
         	setPrefix (parser.getNamespacePrefix (i), parser.getNamespaceUri(i));

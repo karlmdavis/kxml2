@@ -216,7 +216,9 @@ public class KXmlSerializer implements XmlSerializer {
         if (namespace == null)
             namespace = "";
 
+		depth++;
         String defined = getPrefix(namespace, true, false);
+		depth--;
 
         // boil out if already defined
 
