@@ -834,8 +834,9 @@ public class WbxmlParser implements XmlPullParser {
             attributes[i++] = null;
             attributes[i++] = name;
             attributes[i++] = value.toString();
+            
+            attributeCount++;
         }
-
     }
 
 	private int peekId () throws IOException {
@@ -867,6 +868,7 @@ public class WbxmlParser implements XmlPullParser {
 		type = START_TAG;
         name = resolveId(tagTable, id & 0x03f);
 
+		attributeCount = 0;
         if ((id & 128) != 0) {
             readAttr();
         }
