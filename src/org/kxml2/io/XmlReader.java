@@ -102,8 +102,10 @@ public class XmlReader implements org.xmlpull.v1.XmlPullParser {
 	else if (r == '\n' || r == '\r') {
 	    line++;
 	    column = 0;
-	    if (r == '\r' && peek0 == '\n')
+	    if (r == '\r' && peek0 == '\n') {
+                r = '\n';
 		peek0 = 0;
+            }
 	}
 	column++;
 
