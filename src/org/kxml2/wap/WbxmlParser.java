@@ -970,8 +970,8 @@ public class WbxmlParser implements XmlPullParser {
      * The first string in the array defines tag 5, the second tag 6 etc.
      */
 
-    public void setTagTable(int page, String[] tagTable) {
-    	setTable(page, TAG_TABLE, tagTable);
+    public void setTagTable(int page, String[] table) {
+    	setTable(page, TAG_TABLE, table);
     	
 //        this.tagTable = tagTable;
   //      if (page != 0)
@@ -988,13 +988,9 @@ public class WbxmlParser implements XmlPullParser {
 
     public void setAttrStartTable(
         int page,
-        String[] attrStartTable) {
+        String[] table) {
 
-		setTable(page, ATTR_START_TABLE, tagTable);
-
-//        this.attrStartTable = attrStartTable;
- //       if (page != 0)
-   //         throw new RuntimeException("code pages curr. not supp.");
+		setTable(page, ATTR_START_TABLE, table);
     }
 
     /** Sets the attribute value Table for a given page.
@@ -1005,13 +1001,9 @@ public class WbxmlParser implements XmlPullParser {
 
     public void setAttrValueTable(
         int page,
-        String[] attrStartTable) {
+        String[] table) {
 
-		setTable(page, ATTR_VALUE_TABLE, tagTable);
-
-//        this.attrValueTable = attrStartTable;
-  //      if (page != 0)
-    //        throw new RuntimeException("code pages curr. not supp.");
+		setTable(page, ATTR_VALUE_TABLE, table);
     }
 
 }
