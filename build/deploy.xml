@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='iso-8859-1' ?>
+
+<il:Update xmlns:il="http://www.infolayer.org/soap" objectMatching="sloppy" stringHandling="reflow">
+      
+  <Release>
+     <version>2.28</version>
+     <description>testdescription</description>
+     <project>kxml2</project>
+     <file>
+        <item href="#source" />
+     </file>
+  </Release>
+  
+  <ReleaseFile>
+     <name>kxml-source.zip</name>
+     <data href="../dist/kxml-source.zip />
+  </ReleaseFile>
+  
+</il:Update>
+
