@@ -706,6 +706,7 @@ public class KXmlParser implements XmlPullParser {
         throws IOException, XmlPullParserException {
 
         int next = peek(0);
+		int cbrCount =0;
 
         while (next != -1 && next != delimiter) { // covers eof, '<', '"'
 
@@ -725,6 +726,14 @@ public class KXmlParser implements XmlPullParser {
             }
             else
                 push(read());
+
+			if(next == '>' && cbrCount >= 2 && delimiter != ']')
+				exception("Illegal: ]]>");
+
+			if(next == ']')
+				cbrCount++;
+			else
+				cbrCount = 0;
 
             next = peek(0);
         }
