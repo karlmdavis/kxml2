@@ -44,6 +44,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     private String [] elementStack = new String [16];
     private String [] nspStack = new String [8];
     private int [] nspCounts = new int [4]; 
+    private boolean normalize;
 
     // source
 
@@ -54,13 +55,10 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     private int srcPos;
     private int srcCount;
 
-    private boolean eof;
+    //    private boolean eof;
 
     private int line;
     private int column;
-    
-    private int peek0;
-    private int peek1;
     
     // txtbuffer
 
@@ -79,6 +77,10 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     private boolean degenerated;
     private int attributeCount;
     private String [] attributes = new String [16];
+
+    private int [] peek = new int [2];
+    private int peekCount;
+    private boolean wasCR;
 
 
     public KXmlParser () {
@@ -202,6 +204,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
     private final int nextImpl (boolean token) throws IOException, XmlPullParserException {
 	
+	normalize = !token;
 	attributeCount = 0;
 
 	if (degenerated) {
@@ -239,8 +242,9 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    if (depth == 0) {
 		if (isWhitespace) 
 		    type = IGNORABLE_WHITESPACE;
-		else 
-		    exception ("text not allowed outside root element");
+		// make exception switchable for instances.chg... !!!!
+		//	else 
+		//    exception ("text '"+getText ()+"' not allowed outside root element");
 	    }
 	    break;
 
@@ -271,7 +275,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    result = PROCESSING_INSTRUCTION;
 	}
 	else if (c == '!') {
-	    if (peek0 == '-') {
+	    if (peek (0) == '-') {
 		result = COMMENT;
 		req = "--";
 		term = '-'; 
@@ -297,13 +301,13 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    parseDoctype (push);
 	else {
 	    while (true) {
-		if (eof) exception (UNEXPECTED_EOF);
-		
 		c = read ();
+		if (c == -1) exception (UNEXPECTED_EOF);
+
 		if (push) push (c);
 		
 		if ((term == '?' || c == term)
-		    && peek0 == term && peek1 == '>') break;
+		    && peek (0) == term && peek (1) == '>') break;
 	    }
 	    read ();
 	    read ();
@@ -372,14 +376,14 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
     
     
-    private final int peekType () {
-	switch (peek0) {
+    private final int peekType () throws IOException {
+	switch (peek (0)) {
 	case -1: 
 	    return END_DOCUMENT;
 	case '&': 
 	    return ENTITY_REF;
 	case '<':
-	    switch (peek1) {
+	    switch (peek (1)) {
 	    case '/': return END_TAG;
 	    case '[': return CDSECT;
 	    case '?': 
@@ -406,8 +410,6 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     */
 
     private final void push (int c) {
-	if (c == 0) return;
-
 	if (txtPos == txtBuf.length) {
 	    char[] bigger = new char [txtPos * 4 / 3 + 4];
 	    System.arraycopy (txtBuf, 0, bigger, 0, txtPos);
@@ -428,7 +430,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	while (true) { 
 	    skip ();
 	    
-	    int c = peek0;
+	    int c = peek (0);
 	    
 	    if (c == '/') {
 		degenerated = true;
@@ -515,15 +517,17 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	
 	int pos = txtPos;
 
-	while (!eof && peek0 != ';') 
-	    push (read ());
+	while (true) {
+	    int c = read ();
+	    if (c == ';') break; 
+	    if (c == -1) exception (UNEXPECTED_EOF);
+	    push (c);
+	}
 	
 	String code = get (pos);
 	txtPos = pos;
 	if (setName) name = code;
 
-	read (); 
-	
 	if (code.charAt (0) == '#') {
 	    int c = (code.charAt (1) == 'x' 
 		     ? Integer.parseInt (code.substring (2), 16) 
@@ -560,9 +564,9 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 				    boolean resolveEntities) throws IOException, XmlPullParserException {
 		
 	boolean whitespace = true;
-	int next = peek0;
+	int next = peek (0);
 	
-	while (!eof && next != delimiter) { // covers eof, '<', '"' 
+	while (next != -1 && next != delimiter) { // covers eof, '<', '"' 
 	    
 	    if (delimiter == ' ') 
 		if (next <= ' ' || next == '>') break;
@@ -581,7 +585,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 		push (read ());
 	    }
 
-	    next = peek0;
+	    next = peek (0);
 	}
 	
 	return whitespace;
@@ -593,45 +597,56 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	    exception ("expected: '"+c+"'");
     }
 
-
+    
     private final int read () throws IOException {
+	int result = peek (0);
+	peek [0] = peek [1];
+	peekCount--;
 
-	int r = peek0;
-	peek0 = peek1;
-
-	if (peek0 == -1) {
-	    eof = true;
-	    return r;
-	}
-	else if (r == '\n' || r == '\r') {
-	    line++;
-	    column = 0;
-	    if (r == '\r' && peek0 == '\n')
-		r = '\n';
-		peek0 = 0;
-	}
 	column++;
-
-        if (srcBuf.length <= 1) {
-            peek1 = reader.read ();
-            return r;
-        }
-            
-
-	if (srcPos >= srcCount) {
-
-            srcCount = reader.read (srcBuf, 0, srcBuf.length);
-            if (srcCount <= 0) {
-                peek1 = -1;
-                return r;
-            }
-            srcPos = 0;
+	if (result == '\n') {
+	    line++;
+	    column = 1;
 	}
-	
-	peek1 = srcBuf [srcPos++];
-	return r;
+
+	return result;
     }
 
+
+    private final int peek (int pos) throws IOException {
+
+	while (pos >= peekCount) {
+
+	    int nw;
+
+	    if (srcBuf.length <= 1) 
+		nw = reader.read ();
+	    else if (srcPos < srcCount) 
+		nw = srcBuf [srcPos++];
+	    else {
+		srcCount = reader.read (srcBuf, 0, srcBuf.length);
+		if (srcCount <= 0) 
+		    nw = -1;
+		else 
+		    nw = srcBuf [0]; 
+		
+		srcPos = 1;
+	    }
+
+	    if (wasCR && nw == '\n') 
+		wasCR = false;
+	    else if (nw == '\r' && normalize) {
+		wasCR = true;
+		peek [peekCount++] = '\n';
+	    }
+	    else {
+		peek [peekCount++] = nw;
+		wasCR = false;
+	    }
+	}
+
+	return peek [pos];
+    }
 
 
     
@@ -639,7 +654,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
     XmlPullParserException {
 
 	int pos = txtPos;
-	int c = peek0;
+	int c = peek (0);
 	if ((c < 'a' || c > 'z')
 	    && (c < 'A' || c > 'Z')
 	    && c != '_' && c != ':')
@@ -647,7 +662,7 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
 	do {
 	    push (read ());
-	    c = peek0;
+	    c = peek (0);
 	}
 	while ((c >= 'a' && c <= 'z')
 	       || (c >= 'A' && c <= 'Z')
@@ -664,8 +679,11 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 
     private final void skip () throws IOException {
 	
-	while (!eof && peek0 <= ' ') 
+	while (true) {
+	    int c = peek (0);
+	    if (c > ' ' || c == -1) break; 
 	    read ();
+	}
     }
     
 
@@ -679,15 +697,10 @@ public class KXmlParser implements org.xmlpull.v1.XmlPullParser {
 	
 	if (reader == null) return;
 
-	try {
-	    peek0 = reader.read ();
-	    peek1 = reader.read ();
-	}
-	catch (IOException e) {
-	    throw new XmlPullParserException (e.toString (), e);
-	}
-
-	eof = peek0 == -1;
+	srcPos = 0;
+	srcCount = 0;
+	peekCount = 0;
+	depth = 0;
 
 	entityMap = new Hashtable ();
 	entityMap.put ("amp", "&");
