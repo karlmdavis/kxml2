@@ -18,6 +18,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE. */
 
+// Contributors: Paul Hackenberger (unterminated entity handling in relaxed mode)
+
 package org.kxml2.io;
 
 import java.io.*;
@@ -714,14 +716,16 @@ public class KXmlParser implements XmlPullParser {
         elementStack[sp + 2] = name;
     }
 
-    /** result: isWhitespace; if the setName parameter is set,
-    the name of the entity is stored in "name" */
+    /** 
+     * result: isWhitespace; if the setName parameter is set,
+     * the name of the entity is stored in "name" */
 
     private final void pushEntity()
         throws IOException, XmlPullParserException {
 
-        read(); // &
-
+        push(read()); // &
+        
+        
         int pos = txtPos;
 
         while (true) {
@@ -735,7 +739,9 @@ public class KXmlParser implements XmlPullParser {
                 && c != '_'
                 && c != '-'
                 && c != '#') {
-                error("unterminated entity ref");
+            	if(!relaxed){
+            		error("unterminated entity ref");
+            	}
                 //; ends with:"+(char)c);           
                 if (c != -1)
                     push(c);
@@ -746,9 +752,10 @@ public class KXmlParser implements XmlPullParser {
         }
 
         String code = get(pos);
-        txtPos = pos;
-        if (token && type == ENTITY_REF)
+        txtPos = pos - 1;
+        if (token && type == ENTITY_REF){
             name = code;
+        }
 
         if (code.charAt(0) == '#') {
             int c =
