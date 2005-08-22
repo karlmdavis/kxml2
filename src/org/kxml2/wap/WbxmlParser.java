@@ -1023,8 +1023,7 @@ public class WbxmlParser implements XmlPullParser {
     
     /** Sets the attribute start Table for a given page.
      *	The first string in the array defines attribute
-     *  5, the second attribute 6 etc.
-     *  Currently, only page 0 is supported. Please use the
+     *  5, the second attribute 6 etc. Please use the
      *  character '=' (without quote!) as delimiter
      *  between the attribute name and the (start of the) value
      */
@@ -1039,7 +1038,6 @@ public class WbxmlParser implements XmlPullParser {
     /** Sets the attribute value Table for a given page.
      *	The first string in the array defines attribute value 0x85,
      *  the second attribute value 0x86 etc.
-     *  Currently, only page 0 is supported.
      */
     
     public void setAttrValueTable(
