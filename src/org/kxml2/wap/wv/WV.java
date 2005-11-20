@@ -34,7 +34,7 @@ public abstract class WV {
 
     
     
-	public WbxmlParser createParser () throws IOException {
+	public static WbxmlParser createParser () throws IOException {
 		
 		WbxmlParser parser = new WbxmlParser();
 
