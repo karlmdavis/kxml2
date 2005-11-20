@@ -938,7 +938,7 @@ public class KXmlParser implements XmlPullParser {
         }
     }
 
-    //--------------- public part starts here... ---------------
+    //  public part starts here...
 
     public void setInput(Reader reader) throws XmlPullParserException {
         this.reader = reader;
@@ -1348,7 +1348,7 @@ public class KXmlParser implements XmlPullParser {
         return type;
     }
 
-    //----------------------------------------------------------------------
+    //
     // utility methods to make XML parsing easier ...
 
     public int nextTag() throws XmlPullParserException, IOException {
