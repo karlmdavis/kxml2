@@ -3,6 +3,8 @@
 
 <project name="kxml2" default="build" basedir=".">
 
+  <property name="version" value="2.2.2" />	
+	
   
   <target name="javadoc">
     <delete dir="www/kxml2/javadoc"/>
@@ -21,7 +23,7 @@
   
     
     <target name="build_src" depends="build_jar,javadoc">
-		<zip zipfile="dist/kxml2-src.zip">
+		<zip zipfile="dist/kxml2-src-${version}.zip">
 		  <fileset dir=".">
 		    <include name="*/**" />
 		    <exclude name=".*" />
@@ -47,12 +49,13 @@
     	       destdir="tmpclasses"
     	       optimize="true"
     		   target="1.1"
+    		   source="1.2"
     	       debuglevel="none"/>
 	
         <mkdir dir="dist"/>
             
     	
-		<jar jarfile="dist/kxml2.jar" >
+		<jar jarfile="dist/kxml2-${version}.jar" >
 			<fileset dir="tmpclasses">
 				<include name="**/*.class"/>
 				<include name="META-INF/**"/>
@@ -62,7 +65,7 @@
 			</fileset>			
 		</jar>
 
-		<jar jarfile="dist/kxml2-min.jar">
+		<jar jarfile="dist/kxml2-min-${version}.jar">
 			<fileset dir="tmpclasses">
 		<!--		<include name="META-INF/**"/>  -->
 				<include name="org/xmlpull/v1/XmlPullParser.class"/>
@@ -77,6 +80,8 @@
 
     <target name="build" depends="build_src" />
 
+	<!-- too many external dependencies, please use gftp or similar instead 
+
 	<target name="deploy" depends="build" >
       <ftp server="upload.sourceforge.net"
          userid="anonymous"
@@ -85,7 +90,8 @@
          <fileset dir="dist"/>
       </ftp>
     </target>
- 
+  
+  -->
 	
     
 </project>
