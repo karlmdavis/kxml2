@@ -6,6 +6,10 @@
 <h1>kXML News</h1>
 <table>
  <tr>
+  <td valign="top">2005-12-04</td>
+  <td valign="top">kXML 2 release 2.2.2: Maintenance release (also fixed links to IBM tutorial below and on the kxml2 page)</td>
+ </tr>
+ <tr>
   <td valign="top">2005-03-10</td>
   <td valign="top">kXML 2 release 2.2.1: Bugfix for a getPositionDescription() problem if setReader was not called (1093859); thanks to Joe Chenbug.</td>
  </tr>
