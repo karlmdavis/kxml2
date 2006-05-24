@@ -321,9 +321,38 @@ public class WbxmlSerializer implements XmlSerializer {
         return this;
     }
     
-    /** currently ignored! */
+    /** currently ignored! 
+     * @throws IOException */
     
-    public void writeLegacy(int type, String data) {
+    public void writeWapExtension(int type, Object data) throws IOException {
+    	buf.write(type);
+    	switch(type){
+    	case Wbxml.EXT_0:
+    	case Wbxml.EXT_1:
+    	case Wbxml.EXT_2:
+    		break;
+    	
+    	case Wbxml.OPAQUE:
+    		byte[] bytes = (byte[]) data;
+    		writeInt(buf, bytes.length);
+    		buf.write(bytes);
+    		break;
+    		
+    	case Wbxml.EXT_I_0:
+    	case Wbxml.EXT_I_1:
+    	case Wbxml.EXT_I_2:
+    		writeStrI(buf, (String) data);
+    		break;
+
+    	case Wbxml.EXT_T_0:
+    	case Wbxml.EXT_T_1:
+    	case Wbxml.EXT_T_2:
+    		writeStrT((String) data);
+    		break;
+    		
+    	default: 
+    		throw new IllegalArgumentException();
+    	}
     }
     
     // ------------- internal methods --------------------------
