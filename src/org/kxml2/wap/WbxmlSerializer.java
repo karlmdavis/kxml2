@@ -325,6 +325,7 @@ public class WbxmlSerializer implements XmlSerializer {
      * @throws IOException */
     
     public void writeWapExtension(int type, Object data) throws IOException {
+        checkPending(false);
     	buf.write(type);
     	switch(type){
     	case Wbxml.EXT_0:

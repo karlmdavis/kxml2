@@ -33,6 +33,9 @@ import org.xmlpull.v1.*;
 
 public class WbxmlParser implements XmlPullParser {
     
+	/** Parser event type for Wbxml-specific events. The Wbxml event code can be 
+	 * accessed with getWapCode() */
+	
     public static final int WAP_EXTENSION = 64;
     
     static final private String UNEXPECTED_EOF =
@@ -77,7 +80,7 @@ public class WbxmlParser implements XmlPullParser {
     private String text;
     //	private String encoding;
     private Object wapExtensionData;
-    private int wapExtensionCode;
+    private int wapCode;
     
     private int type;
     private int codePage;
@@ -408,7 +411,7 @@ public class WbxmlParser implements XmlPullParser {
         || (namespace != null && !namespace.equals(getNamespace()))
         || (name != null && !name.equals(getName())))
             exception(
-            "expected: " + TYPES[type] + " {" + namespace + "}" + name);
+            "expected: " + (type == WAP_EXTENSION ? "WAP Ext." : (TYPES[type] + " {" + namespace + "}" + name)));
     }
     
     
@@ -728,7 +731,7 @@ public class WbxmlParser implements XmlPullParser {
     throws IOException, XmlPullParserException {
         
         type = WAP_EXTENSION;
-        wapExtensionCode = id;
+        wapCode = id;
         
         switch (id) {
             case Wbxml.EXT_I_0 :
@@ -873,13 +876,17 @@ public class WbxmlParser implements XmlPullParser {
     
     String resolveId(String[] tab, int id) throws IOException {
         int idx = (id & 0x07f) - 5;
-        if (idx == -1)
+        if (idx == -1){
+        	wapCode = -1;
             return readStrT();
+        }
         if (idx < 0
         || tab == null
         || idx >= tab.length
         || tab[idx] == null)
             throw new IOException("id " + id + " undef.");
+        
+        wapCode = idx+5;
         
         return tab[idx];
     }
@@ -1045,5 +1052,18 @@ public class WbxmlParser implements XmlPullParser {
         
         setTable(page, ATTR_VALUE_TABLE, table);
     }
+    
+    /** Returns the token ID for start tags or the event type for wap proprietary events
+     * such as OPAQUE.
+     */
+    
+    public int getWapCode(){
+    	return wapCode;
+    }
+    
+    public Object getWapExtensionData(){
+    	return wapExtensionData;
+    }
+    
     
 }

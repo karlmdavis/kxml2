@@ -29,7 +29,7 @@
 		    <exclude name=".*" />
 		    <exclude name="classes/**" />
 		    <exclude name="tmpclasses/**" />
-		    <exclude name="dist/kxml2-src.zip"/>
+		    <exclude name="dist/kxml2-${version}-src.zip"/>
 		   </fileset>
 		</zip>    
     
