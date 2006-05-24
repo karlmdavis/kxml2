@@ -750,13 +750,12 @@ public class WbxmlParser implements XmlPullParser {
                 
             case Wbxml.OPAQUE : 
             {
-                int len = readInt();
-                byte[] buf = new byte[len];
+                int count = readInt();
+                byte[] buf = new byte[count];
                 
-                for (int i = 0;
-                i < len;
-                i++) // enhance with blockread!
-                    buf[i] = (byte) readByte();
+                while(count > 0){
+                	count -= in.read(buf, buf.length-count, count);
+                }
                 
                 wapExtensionData = buf;
             } // case OPAQUE
