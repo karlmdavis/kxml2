@@ -29,7 +29,7 @@
 		    <exclude name=".*" />
 		    <exclude name="classes/**" />
 		    <exclude name="tmpclasses/**" />
-		    <exclude name="dist/kxml2-${version}-src.zip"/>
+		    <exclude name="dist/kxml2-src-*.zip"/>
 		   </fileset>
 		</zip>    
     
@@ -80,18 +80,6 @@
 
     <target name="build" depends="build_src" />
 
-	<!-- too many external dependencies, please use gftp or similar instead 
-
-	<target name="deploy" depends="build" >
-      <ftp server="upload.sourceforge.net"
-         userid="anonymous"
-         remotedir="/incoming"
-         password="sf-deploy@kobjects.org">
-         <fileset dir="dist"/>
-      </ftp>
-    </target>
-  
-  -->
 	
     
 </project>

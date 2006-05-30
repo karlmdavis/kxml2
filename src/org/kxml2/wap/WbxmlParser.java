@@ -77,16 +77,15 @@ public class WbxmlParser implements XmlPullParser {
     private String namespace;
     private String name;
     private String text;
-    //	private String encoding;
+
     private Object wapExtensionData;
     private int wapCode;
     
     private int type;
-    private int codePage;
     
     private boolean degenerated;
     private boolean isWhitespace;
-    private String encoding = null;
+    private String encoding;
     
     public boolean getFeature(String feature) {
         if (XmlPullParser
@@ -98,7 +97,6 @@ public class WbxmlParser implements XmlPullParser {
     }
     
     public String getInputEncoding() {
-        // should return someting depending on charSet here!!!!!
         return encoding;
     }
     
@@ -344,6 +342,7 @@ public class WbxmlParser implements XmlPullParser {
                 switch(peekId()) {
                     case Wbxml.ENTITY:
                     case Wbxml.STR_I:
+                    case Wbxml.STR_T:
                     case Wbxml.LITERAL:
                     case Wbxml.LITERAL_C:
                     case Wbxml.LITERAL_A:

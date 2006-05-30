@@ -24,13 +24,15 @@ public class WbxmlRoundtrip {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		
 		XmlPullParser xp = new KXmlParser();
-		xp.setInput(new FileReader(argv[0]));
+		xp.setInput(new FileInputStream(argv[0]), null);
 		XmlSerializer xs = new WbxmlSerializer();
 		xs.setOutput(bos, null); 
 		
 		new Roundtrip(xp, xs).roundTrip();
 		
 		byte[] wbxml = bos.toByteArray();
+		
+		System.out.println("********* WBXML size: "+wbxml.length+" ***********");	
 		
 		for(int i = 0; i < wbxml.length; i += 16){
 			for (int j = i; j < Math.min(i + 16, wbxml.length); j ++) {
@@ -42,7 +44,7 @@ public class WbxmlRoundtrip {
 			
 			for (int j = i; j < Math.min(i + 16, wbxml.length); j ++) {
 				int b = wbxml[j];
-				System.out.print(b >= 32 && b <= 127 ? (char) b : '?');
+				System.out.print(b >= 32 && b <= 127  ? (char) b : '?');
 			}
 			
 			System.out.println();
