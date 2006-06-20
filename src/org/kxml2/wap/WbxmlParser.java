@@ -732,7 +732,7 @@ public class WbxmlParser implements XmlPullParser {
         //        return next;
     }
     
-    
+    /** Overwrite this method to intercept all wap events */
     
     public Object parseWapExtension(int id)  throws IOException, XmlPullParserException {
         

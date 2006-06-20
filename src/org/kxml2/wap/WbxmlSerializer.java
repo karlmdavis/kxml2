@@ -369,7 +369,7 @@ public class WbxmlSerializer implements XmlSerializer {
         return this;
     }
     
-    /** currently ignored! 
+    /** 
      * @throws IOException */
     
     public void writeWapExtension(int type, Object data) throws IOException {
