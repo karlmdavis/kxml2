@@ -32,7 +32,9 @@ import org.xmlpull.v1.*;
 
 
 public class WbxmlParser implements XmlPullParser {
-    
+
+	static final String HEX_DIGITS = "0123456789abcdef";
+	
 	/** Parser event type for Wbxml-specific events. The Wbxml event code can be 
 	 * accessed with getWapCode() */
 	
@@ -869,8 +871,8 @@ public class WbxmlParser implements XmlPullParser {
     		byte[] b = (byte[]) data;
     		
     		for (int i = 0; i < b.length; i++) {
-    			sb.append(Character.forDigit((b[i] >> 4) & 0x0f, 16));
-    			sb.append(Character.forDigit(b[i] & 0x0f, 16));
+    			sb.append(HEX_DIGITS.charAt((b[i] >> 4) & 0x0f));
+    			sb.append(HEX_DIGITS.charAt(b[i] & 0x0f));
     		}
     		return sb.toString();
     	}
