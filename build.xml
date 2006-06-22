@@ -3,7 +3,7 @@
 
 <project name="kxml2" default="build" basedir=".">
 
-  <property name="version" value="2.2.3" />	
+  <property name="version" value="2.3.0" />	
 	
   
   <target name="javadoc">
