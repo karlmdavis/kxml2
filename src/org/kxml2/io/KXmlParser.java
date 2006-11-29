@@ -65,13 +65,14 @@ public class KXmlParser implements XmlPullParser {
 
     // txtbuffer
 
+    /** Target buffer for storing incoming text (including aggregated resolved entities) */
     private char[] txtBuf = new char[128];
+    /** Write position  */
     private int txtPos;
 
     // Event-related
 
     private int type;
-    //private String text;
     private boolean isWhitespace;
     private String namespace;
     private String prefix;
@@ -657,8 +658,10 @@ public class KXmlParser implements XmlPullParser {
             skip();
 
             if (peek(0) != '=') {
-				error("Attr.value missing f. "+attrName);
-                attributes[i] = "1";
+            	if(!relaxed){
+            		error("Attr.value missing f. "+attrName);
+            	}
+                attributes[i] = attrName;
             }
             else {
                 read('=');
@@ -666,7 +669,9 @@ public class KXmlParser implements XmlPullParser {
                 int delimiter = peek(0);
 
                 if (delimiter != '\'' && delimiter != '"') {
-                    error("attr value delimiter missing!");
+                	if(!relaxed){
+                		error("attr value delimiter missing!");
+                	}
                     delimiter = ' ';
                 }
 				else 
