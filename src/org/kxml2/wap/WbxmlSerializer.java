@@ -30,7 +30,7 @@ import org.xmlpull.v1.*;
 // TODO: make some of the "direct" WBXML token writing methods public??
 
 /**
- * A class for writing WBXML.
+ * A class for writing WBXML. Does not support namespaces yet.
  *
  */
 
