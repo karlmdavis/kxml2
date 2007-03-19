@@ -33,7 +33,7 @@ public class TestWb extends TestCase
 		xs.endTag(null,"y");
 		xs.startTag(null,"y");
 		xs.attribute(null,"name","value");
-		xs.writeWapExtension(Wbxml.EXT_T_1,2);
+		xs.writeWapExtension(Wbxml.EXT_T_1,new Integer(2));
 		xs.endTag(null,"y");
 		xs.endTag(null,"root");
 		xs.endDocument();
