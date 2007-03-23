@@ -1,0 +1,81 @@
+<h1>kXML 2 Documentation</h1>
+
+
+<p>kXML 2 implements the XmlPull API. Please find general information about
+XmlPull parsers including the interface documentation at 
+<a href="http://xmlpull.org">xmlpull.org</a>.</p>
+
+<p>Naveen Balani has written a <a 
+href="http://www-128.ibm.com/developerworks/edu/wi-dw-wi-kxml-i.html">nice 
+introduction to kxml 2</a> for IBM Developer Works.</p>
+
+<p>For kXML specific classes, in particular for WBXML, please refer
+to the kXML API Documentation:</p>
+<ul>
+<li><a href="http://kobjects.net/projects/kxml/www/api/">kXML JavaDoc</a>
+</ul>
+
+
+<h2>Special Features</h2>
+
+<p>kXML has two "special" features that are intended to simplify developers' life in constrained environments:</p>
+
+<ul>
+<li>Support for <em>WBXML</em> (WAP binary encoded XML): Allows to parse WAP or Wireless Village content</li>
+<li>A robust <em>"relaxed" mode</em> for parsing HTML or SGML files (that are not well-formed XML documents) in order to avoid 
+ the need of two separate parsers in mobile phones.</li>
+</ul>
+
+
+<h2>Recommended Calling Conventions</h2>
+
+When handing an XMLpull parser to subroutines, it is recommended that the current 
+position is on a start tag (allowing the subroutine to analyze the attributes). 
+The post condition should usually be that the current position is the matching end tag.
+
+
+<h2>Parsing Element-Only and Text-Only Content</h2>
+
+<p>General XML content can be parsed with the XML pull API using a loop advanving
+to the next event and a switch statement that depends on the event type. However, 
+when using XML for data transfer (in contrast to text documents), most XML elements 
+contain either only text or only other elements (possibly with further sub-elements). 
+For those common cases, the parsing process can be simplified significantly by
+using the XmlPull API methods <em>nextTag</em> and <em>nextText</em>. 
+
+Additionally, the method <em>require()</em> may optionally be used to assert a 
+certain parser state.  The following sample illustrates both situations and methods. 
+The outer element <em>elements</em> has element-only content; the contained 
+<em>text</em>-elements have text-only content:</p>
+
+<pre>
+&lt;elements&gt;
+  &lt;text&gt;text1&lt;/text&gt;
+  &lt;text&gt;text2&lt;/text&gt;
+&lt;/elements&gt;  
+</pre>  
+
+<p>Parsing Code</p>
+<pre>
+parser.nextTag();
+parser.require(XmlPullParser.START_TAG, null, "elements");
+
+while(parser.nextTag() == XmlPullParser.START_TAG) {
+  parser.require(XmlPullParser.START_TAG, null, "text");
+
+   // handle element content
+   System.out.println("text content: "+ parser.nextText());
+
+  parser.require(XmlPullParser.END_TAG, null, "text");
+}
+
+parser.require(XmlPullParser.END_TAG, null, "elements");
+</pre>
+
+<p><em>nextTag()</em> advances to the next 
+start or end tag, skipping insignificant events such as white space, 
+comments and PIs. <em>nextText()</em> requires that the current position 
+is a start tag. It returns the text content of the corresponding element. 
+The post condition is that the current position is an end tag.
+Please note that the calls <em>require()</em> are optional assertions, 
+they may be left out completely. </p>

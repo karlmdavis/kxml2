@@ -1,0 +1,80 @@
+<html>
+<head><title>About kXML</title></head>
+<body bgcolor="#ffffff">
+<!--#include virtual="prolog.shtml" -->
+
+
+
+<h1>About kXML</h1>
+       
+<p>kXML is a small XML pull parser, specially designed for constrained environments such as Applets, Personal Java or MIDP devices. In contrast to kXML 1, kXML 2 is based on the <a href="http://xmlpull.org">common 
+XML pull API</a>.  </p>
+
+
+<p>Pull based XML parsing combines some of the advantages of SAX and DOM:</p>
+
+<ul>
+
+<li>In contrast to push parsers (SAX), pull parsers such as kXML make it possible to model the
+XML processing routines after the structure of the processed XML document. Events processing
+is similar to an InputStream. If a part of the stream requires special handling, the parser 
+can simply be delegated to a specialized method by handing over the parser. </li>
+
+<li>While the above is also possible with an explicit DOM, DOM usually requires that the whole
+document structure is present in main memory.</li>
+
+<li>In contrast to DOM based parsing, the XML events are accessible immediately when they
+are available, it is not necessary to wait for the whole tree to build up.</li>
+
+</ul>
+
+
+<h2>kXML History and Versions</h2>
+
+ <table border="1" >
+  <tr>
+   <td valign="top">XP</td>
+   <td valign="top">XP was the predecessor of kXML, a simple wrapper that turned a given SAX parser 
+       into a pull parser.
+       XP was originally implemented to simplify message (de)serialization in the Infolayer project,
+       which is quite cumbersome with push parsers (SAX).</td>
+  </tr>
+  <tr>
+   <td valign="top">kXML1</td>
+   <td valign="top">To use the pull parser on embedded devices, it was necessary to get
+       rid of the SAX dependency. kXML1 is a simple pull parser, based on event objects. 
+       kXML1 is now deprecated, please use kXML2 instead. kXML1 is archieved at 
+       <a href="http://kxml.objectweb.org">kxml.objectweb.org</a>.</td>
+  </tr>
+  <tr>
+   <td valign="top">kXML2</td>
+   <td valign="top">The current version of kXML. In contrast to kXML1, it features cursor
+       API instead of event objects, leading to a reduced footprint and less object
+       creation overhead. kXML 2 is released under the BSD license.</td>
+  </tr>
+ </table> 
+ 
+</center>
+
+
+
+<h2>XML Conformance</h2>
+
+<p>In order to keep kXML as small as possible, no efforts are made to recognize certain well-formedness errors that would require additional detection code, such as</p>
+
+<ul>
+<li>']]&gt;' contained in text content,</li>
+<li>duplicate attributes, and</li>
+<li>&lt;? folowed by a space before the target.</li>
+</ul>
+
+<p>Thus, kXML will accept some XML documents that should actually be rejected. Of course, an XML parser should detect all syntax errors to discourage the creation of bogous documents that work with one parser and do not work with another. Thus, if you are not limited by memory constraints, please use  <a href="http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/">MXP</a>, which is also faster than kXML.</p>
+
+<p align="right">
+<small>(C) 1999-2005 <a href="http://trantor.de/stefan.haustein">Stefan Haustein</a></small>
+</p>
+
+<!--#include virtual="epilog.shtml" -->
+
+</body>
+</html>
