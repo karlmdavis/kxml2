@@ -7,12 +7,12 @@
 	
   
   <target name="javadoc">
-    <delete dir="www/kxml2/javadoc"/>
-    <mkdir dir="www/kxml2/javadoc"/>    
+    <delete dir="doc/api"/>
+    <mkdir dir="doc/api"/>    
     <javadoc packagenames="org.kxml2.*" classpath="lib/xmlpull_1_1_3_1.jar"
              public="yes"
              sourcepath="src"
-             destdir="www/kxml2/javadoc"
+             destdir="doc/api"
              author="true"
              version="true"
              use="true"
