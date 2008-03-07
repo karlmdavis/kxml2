@@ -81,7 +81,7 @@ public class KXmlParser implements XmlPullParser {
     private boolean degenerated;
     private int attributeCount;
     private String[] attributes = new String[16];
-    private int stackMismatch = 0;
+//    private int stackMismatch = 0;
     private String error;
 
     /** 
@@ -280,19 +280,19 @@ public class KXmlParser implements XmlPullParser {
             }
 
 
-            if (relaxed
-                && (stackMismatch > 0 || (peek(0) == -1 && depth > 0))) {
-                int sp = (depth - 1) << 2;
-                type = END_TAG;
-                namespace = elementStack[sp];
-                prefix = elementStack[sp + 1];
-                name = elementStack[sp + 2];
-                if (stackMismatch != 1)
-                    error = "missing end tag /" + name + " inserted";
-                if (stackMismatch > 0)
-                    stackMismatch--;
-                return;
-            }
+//            if (relaxed
+//                && (stackMismatch > 0 || (peek(0) == -1 && depth > 0))) {
+//                int sp = (depth - 1) << 2;
+//                type = END_TAG;
+//                namespace = elementStack[sp];
+//                prefix = elementStack[sp + 1];
+//                name = elementStack[sp + 2];
+//                if (stackMismatch != 1)
+//                    error = "missing end tag /" + name + " inserted";
+//                if (stackMismatch > 0)
+//                    stackMismatch--;
+//                return;
+//            }
 
             prefix = null;
             name = null;
@@ -455,7 +455,7 @@ public class KXmlParser implements XmlPullParser {
                 prev = c;
             }
 
-            if (term == '-' && prev == '-')
+            if (term == '-' && prev == '-' && !relaxed)
                 error("illegal comment delimiter: --->");
 
             read();
@@ -526,28 +526,30 @@ public class KXmlParser implements XmlPullParser {
             return;
         }
 
-        if (!name.equals(elementStack[sp + 3])) {
+        if (!relaxed) {
+          if (!name.equals(elementStack[sp + 3])) {
             error("expected: /" + elementStack[sp + 3] + " read: " + name);
 
 			// become case insensitive in relaxed mode
 
-            int probe = sp;
-            while (probe >= 0 && !name.toLowerCase().equals(elementStack[probe + 3].toLowerCase())) {
-                stackMismatch++;
-                probe -= 4;
-            }
-
-            if (probe < 0) {
-                stackMismatch = 0;
-                //			text = "unexpected end tag ignored";
-                type = COMMENT;
-                return;
-            }
+//            int probe = sp;
+//            while (probe >= 0 && !name.toLowerCase().equals(elementStack[probe + 3].toLowerCase())) {
+//                stackMismatch++;
+//                probe -= 4;
+//            }
+//
+//            if (probe < 0) {
+//                stackMismatch = 0;
+//                //			text = "unexpected end tag ignored";
+//                type = COMMENT;
+//                return;
+//            }
         }
 
         namespace = elementStack[sp];
         prefix = elementStack[sp + 1];
         name = elementStack[sp + 2];
+        }
     }
 
     private final int peekType() throws IOException {
@@ -734,9 +736,11 @@ public class KXmlParser implements XmlPullParser {
         int pos = txtPos;
 
         while (true) {
-            int c = read();
-            if (c == ';')
-                break;
+            int c = peek(0);
+            if (c == ';') {
+              read();
+              break;
+            }
             if (c < 128
                 && (c < '0' || c > '9')
                 && (c < 'a' || c > 'z')
@@ -747,13 +751,16 @@ public class KXmlParser implements XmlPullParser {
             	if(!relaxed){
             		error("unterminated entity ref");
             	}
+            	
+            	System.out.println("broken entitiy: "+get(pos-1));
+            	
                 //; ends with:"+(char)c);           
-                if (c != -1)
-                    push(c);
+//                if (c != -1)
+//                    push(c);
                 return;
             }
 
-            push(c);
+            push(read());
         }
 
         String code = get(pos);
