@@ -123,10 +123,10 @@ public class Roundtrip {
         	
         while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
             writeToken();
-			serializer.flush();
             parser.nextToken();
         }
         writeToken();
+        serializer.flush();
     }
 
     public static void main(String[] args) throws Exception {
