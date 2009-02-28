@@ -1,0 +1,25 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>net.sourceforge.kxml</groupId>
+		<artifactId>kxml-parent</artifactId>
+		<version>2.2.2</version>
+	</parent>
+
+	<artifactId>kxml-samples-midp</artifactId>
+	<name>kxml-samples-midp</name>
+	<packaging>jar</packaging>
+	<description><![CDATA[
+		A set of sample code for the Java MIDP platform that exercises the kxml library.
+		]]>
+	</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.sourceforge.kxml</groupId>
+			<artifactId>kxml</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>

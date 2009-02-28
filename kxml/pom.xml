@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>net.sourceforge.kxml</groupId>
+		<artifactId>kxml-parent</artifactId>
+		<version>2.2.2</version>
+	</parent>
+
+	<artifactId>kxml</artifactId>
+	<name>kxml</name>
+	<packaging>jar</packaging>
+	<description><![CDATA[
+		kXML is a small XML pull parser, specially designed for constrained environments such as Applets, 
+		Personal Java or MIDP devices. In contrast to kXML 1, kXML 2 is based on the common XML pull API.
+		]]>
+	</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.xmlpull</groupId>
+			<artifactId>xmlpull</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xmlpull</groupId>
+			<artifactId>xmlpull-tck</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack</id>
+						<phase>package</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.xmlpull</groupId>
+									<artifactId>xmlpull-tck</artifactId>
+									<version>1.1.3.1</version>
+									<type>jar</type>
+									<overWrite>false</overWrite>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
