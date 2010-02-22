@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>net.sourceforge.kxml</groupId>
 		<artifactId>kxml-parent</artifactId>
-		<version>2.2.2</version>
+		<version>2.2.3-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>kxml-samples-midp</artifactId>
@@ -19,6 +19,14 @@
 		<dependency>
 			<groupId>net.sourceforge.kxml</groupId>
 			<artifactId>kxml</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sourceforge.me4se</groupId>
+			<artifactId>me4se</artifactId>
+			<version>2.1.4-SNAPSHOT-20040926</version>
+			<type>jar</type>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 

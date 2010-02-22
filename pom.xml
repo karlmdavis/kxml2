@@ -3,7 +3,7 @@
 	
 	<groupId>net.sourceforge.kxml</groupId>
 	<artifactId>kxml-parent</artifactId>
-	<version>2.2.2</version>
+	<version>2.2.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	
 	<name>kxml-parent</name>
@@ -16,17 +16,15 @@
 	<url>http://kxml.sourceforge.net/</url>
 	<inceptionYear>2000</inceptionYear>
 	
-<!--
 	<scm>
-		<connection>scm:git:TODO</connection>
-		<developerConnection>scm:svn:TODO</developerConnection>
-		<url>TODO</url>
+		<connection>scm:git:git://github.com/karlmdavis/kxml2.git</connection>
+		<developerConnection>scm:git:git@github.com:karlmdavis/kxml2.git</developerConnection>
+		<url>http://github.com/karlmdavis/kxml2/tree/master</url>
 	</scm>
--->
 
 	<issueManagement>
 		<system>sourceforge</system>
-		<url>http://sourceforge.net/tracker/?group_id=9157&atid=109157</url>
+		<url>http://sourceforge.net/tracker/?group_id=9157&amp;atid=109157</url>
 	</issueManagement>
 
 	<modules>
@@ -37,23 +35,23 @@
 	
 	<distributionManagement>
 		<repository>
-			<id>eddings</id>
-			<name>eddings</name>
-			<url>scp://eddings.davisonlinehome.name/var/www/maven/repo</url>
+			<uniqueVersion>false</uniqueVersion>
+			<id>googlecode</id>
+			<url>svn:https://ksoap2-android.googlecode.com/svn/m2-repo</url>
 		</repository>
 	</distributionManagement>
 	<repositories>
 		<repository>
-			<id>simplepersistence</id>
-			<name>Simple Persistence Repo</name>
-			<url>http://75.146.134.33:8080/maven/repo</url>
+			<id>googlecode-ksoap2-android</id>
+			<name>googlecode-ksoap2-android</name>
+			<url>http://ksoap2-android.googlecode.com/svn/m2-repo</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
-			<id>simplepersistence</id>
-			<name>Simple Persistence Repo</name>
-			<url>http://75.146.134.33:8080/maven/repo</url>
+			<id>googlecode-ksoap2-android</id>
+			<name>googlecode-ksoap2-android</name>
+			<url>http://ksoap2-android.googlecode.com/svn/m2-repo</url>
 		</pluginRepository>
 	</pluginRepositories>
 	
@@ -189,6 +187,13 @@
 				<directory>src/test/resources</directory>
 			</testResource>
 		</testResources>
+		<extensions>
+			<extension>
+				<groupId>org.jvnet.wagon-svn</groupId>
+				<artifactId>wagon-svn</artifactId>
+				<version>1.9</version>
+			</extension>
+		</extensions>
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -209,6 +214,34 @@
 							</goals>
 						</execution>
 					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.0-beta-9</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-provider-gitexe</artifactId>
+							<version>1.2</version>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<autoVersionSubmodules>true</autoVersionSubmodules>
+						<useReleaseProfile>false</useReleaseProfile>
+						<arguments>-Prelease</arguments>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-scm-plugin</artifactId>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-provider-gitexe</artifactId>
+							<version>1.2</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 			</plugins>
 		</pluginManagement>
