@@ -3,7 +3,7 @@
 	
 	<groupId>net.sourceforge.kxml</groupId>
 	<artifactId>kxml-parent</artifactId>
-	<version>2.2.4-SNAPSHOT</version>
+	<version>2.2.4</version>
 	<packaging>pom</packaging>
 	
 	<name>kxml-parent</name>
